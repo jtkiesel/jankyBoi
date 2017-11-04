@@ -29,13 +29,11 @@ double batteryAdjustedVelocityPct(double velocityPct, double volts) {
 /*
 double batteryAdjustedVelocity(double velocity, double volts) {
 	if (volts >= 7.45) {  // 7.5V or greater.
-		return velocity / ((0.07062032218 * volts - 0.9921818888) * volts
-				+ 4.639376221);
+		return velocity / ((0.07062032218 * volts - 0.9921818888) * volts + 4.639376221);
 	} else if (volts >= 3.95) {  // 4V to 7.5V.
 		return velocity / (0.1647096561 * volts - 0.05101507507);
 	} else if (volts >= 2.95) {  // 3V to 4V.
-		return velocity / ((0.6282129675 * volts - 3.814582687) * volts
-				+ 5.797953843);
+		return velocity / ((0.6282129675 * volts - 3.814582687) * volts + 5.797953843);
 	} else {  // Less than 3V.
 		return 0;
 	}
@@ -52,8 +50,7 @@ int velocityToMotorPower(double velocity) {
 	} else if (v < 0.6) {
 		return sgn(velocity) * (((44.067 * v - 23.925) * v + 29.12) * v + 8.313);
 	} else if (v < 0.935) {
-		return sgn(velocity) * (((913.713 * v - 1825.369) * v + 1283.175) * v
-				- 284.539);
+		return sgn(velocity) * (((913.713 * v - 1825.369) * v + 1283.175) * v - 284.539);
 	}
 	return sgn(velocity) * ((-4042.787 * v + 8101.114) * v - 3972.442);
 }

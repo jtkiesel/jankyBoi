@@ -5,43 +5,43 @@
 
 #include "bnsMath.h"
 
-TrapezoidalMotionProfile *newTrapezoidalMotionProfile(double maxVel, double maxAccel, double xi, double xf, double vi = 0, double vf = 0) {
+TrapezoidalMotionProfile *newTrapezoidalMotionProfile(double maxVel, double maxAccel, double xi, double xf, double vi, double vf) {
     const double dx = xf - xi;
     // Total displacement minus minimum displacement required for vi -> vf.
-	const double dxMp = dx - fabs(pow(vf, 2) - pow(vi, 2)) / (2 * maxAccel);
+    const double dxMp = dx - fabs(pow(vf, 2) - pow(vi, 2)) / (2 * maxAccel);
 
-	if (dxMp < 0) {
-		return NULL;  // Not enough displacement available for vi -> vf.
-	}
-	// Time required for vi -> vf.
-	const unsigned long dtTransition = fabs(vi - vf) / maxAccel;
-	unsigned long t1, t2, t3;
-	if (vi < vf) {
-		t1 = dtTransition;
-		t3 = 0;
-	} else {
-		t1 = 0;
-		t3 = dtTransition;
-	}
-	double baseVel = max(vi, vf);  // Base velocity for the triangle/trapezoid.
+    if (dxMp < 0) {
+        return NULL;  // Not enough displacement available for vi -> vf.
+    }
+    // Time required for vi -> vf.
+    const unsigned long dtTransition = fabs(vi - vf) / maxAccel;
+    unsigned long t1, t2, t3;
+    if (vi < vf) {
+        t1 = dtTransition;
+        t3 = 0;
+    } else {
+        t1 = 0;
+        t3 = dtTransition;
+    }
+    double baseVel = max(vi, vf);  // Base velocity for the triangle/trapezoid.
 
-	// Displacement at max velocity (negative if max velocity can't be reached).
-	double dxMaxVel = dxMp - (pow(maxVel, 2) - pow(baseVel, 2)) / (2 * maxAccel);
+    // Displacement at max velocity (negative if max velocity can't be reached).
+    double dxMaxVel = dxMp - (pow(maxVel, 2) - pow(baseVel, 2)) / (2 * maxAccel);
 
-	double topVel, dtTopVel;
-	if (dxMaxVel < 0) {  // Triangular profile.
-		topVel = sqrt(pow(baseVel, 2) + 2 * maxAccel * dxMp);
-		dtTopVel = 0;
-	} else {  // Trapezoidal profile.
-		topVel = maxVel;
-		dtTopVel = dxMaxVel / maxVel;
-	}
-	double dtAccel = dx / (baseVel + topVel);  // Time required for baseVel -> topVel.
-	t1 += dtAccel;
-    const double x1 = (topVel + vi) * t1 / 2;
-	t2 = t1 + dtTopVel;
+    double topVel, dtTopVel;
+    if (dxMaxVel < 0) {  // Triangular profile.
+        topVel = sqrt(pow(baseVel, 2) + 2 * maxAccel * dxMp);
+        dtTopVel = 0;
+    } else {  // Trapezoidal profile.
+        topVel = maxVel;
+        dtTopVel = dxMaxVel / maxVel;
+    }
+    double dtAccel = dx / (baseVel + topVel);  // Time required for baseVel -> topVel.
+    t1 += dtAccel;
+    const double x1 = (vi + topVel) * t1 / 2;
+    t2 = t1 + dtTopVel;
     const double x2 = x1 + topVel * dtTopVel;
-	t3 += t2 + dtAccel;
+    t3 += t2 + dtAccel;
 
     TrapezoidalMotionProfile *self = (TrapezoidalMotionProfile *)malloc(sizeof(TrapezoidalMotionProfile));
     if (!self) {
