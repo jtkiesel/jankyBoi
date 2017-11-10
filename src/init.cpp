@@ -1,4 +1,4 @@
-/** @file init.c
+/** @file init.cpp
  * @brief File for initialization code
  *
  * This file should contain the user initialize() function and any functions related to it.
@@ -10,7 +10,11 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "main.h"
+#include "main.hpp"
+
+extern "C" {
+  void __libc_init_array();
+}
 
 /*
  * Runs pre-initialization code. This function will be started in kernel mode one time while the
@@ -21,6 +25,7 @@
  * configure a UART port (usartOpen()) but cannot set up an LCD (lcdInit()).
  */
 void initializeIO() {
+    __libc_init_array();
 }
 
 /*

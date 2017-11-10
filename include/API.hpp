@@ -1,10 +1,10 @@
-/** @file API.h
+/** @file API.hpp
  * @brief Provides the high-level user functionality intended for use by typical VEX Cortex
  * programmers.
  *
  * This file should be included for you in the predefined stubs in each new VEX Cortex PROS
- * project through the inclusion of "main.h". In any new C source file, it is advisable to
- * include main.h instead of referencing API.h by name, to better handle any nomenclature
+ * project through the inclusion of "main.hpp". In any new C++ source file, it is advisable to
+ * include main.hpp instead of referencing API.hpp by name, to better handle any nomenclature
  * changes to this file or its contents.
  *
  * Copyright (c) 2011-2016, Purdue University ACM SIGBots.
@@ -18,8 +18,8 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#ifndef API_H_
-#define API_H_
+#ifndef API_HPP_
+#define API_HPP_
 
 // System includes
 #include <stdlib.h>

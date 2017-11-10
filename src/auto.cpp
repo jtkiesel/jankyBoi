@@ -1,4 +1,4 @@
-/** @file auto.c
+/** @file auto.cpp
  * @brief File for autonomous code
  *
  * This file should contain the user autonomous() function and any functions related to it.
@@ -10,7 +10,7 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "main.h"
+#include "main.hpp"
 
 /*
  * Runs the user autonomous code. This function will be started in its own task with the default

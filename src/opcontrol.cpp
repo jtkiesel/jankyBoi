@@ -1,4 +1,4 @@
-/** @file opcontrol.c
+/** @file opcontrol.cpp
  * @brief File for operator control code
  *
  * This file should contain the user operatorControl() function and any functions related to it.
@@ -10,12 +10,15 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "main.h"
+#include "main.hpp"
 
 #include <math.h>
 
-#include "bnsMath.h"
-#include "TrapezoidalMotionProfile.h"
+#include "bnsMath.hpp"
+#include "TrapezoidalMotionProfile.hpp"
+
+using namespace std;
+using namespace bns;
 
 /**
  * Adjusts a target velocity based on the current battery voltage. Voltage is
@@ -26,35 +29,6 @@
 double batteryAdjustedVelocityPct(double velocityPct, double volts) {
 	return velocityPct / (0.1845977782 * volts - 0.08777418571);
 }
-/*
-double batteryAdjustedVelocity(double velocity, double volts) {
-	if (volts >= 7.45) {  // 7.5V or greater.
-		return velocity / ((0.07062032218 * volts - 0.9921818888) * volts + 4.639376221);
-	} else if (volts >= 3.95) {  // 4V to 7.5V.
-		return velocity / (0.1647096561 * volts - 0.05101507507);
-	} else if (volts >= 2.95) {  // 3V to 4V.
-		return velocity / ((0.6282129675 * volts - 3.814582687) * volts + 5.797953843);
-	} else {  // Less than 3V.
-		return 0;
-	}
-}
-*/
-/*
-int velocityToMotorPower(double velocity) {
-	if (velocity == 0) {
-		return 0;
-	}
-	double v = fabs(velocity);
-	if (v >= 1) {
-		return sgn(velocity) * 127;
-	} else if (v < 0.6) {
-		return sgn(velocity) * (((44.067 * v - 23.925) * v + 29.12) * v + 8.313);
-	} else if (v < 0.935) {
-		return sgn(velocity) * (((913.713 * v - 1825.369) * v + 1283.175) * v - 284.539);
-	}
-	return sgn(velocity) * ((-4042.787 * v + 8101.114) * v - 3972.442);
-}
-*/
 
 int velocityPctToMotorSpeed(double velocityPct) {
 	if (velocityPct == 0) {
@@ -102,7 +76,7 @@ void operatorControl() {
 
 	print("starting\n");
 
-	TrapezoidalMotionProfile *motionProfile = newTrapezoidalMotionProfile(100, 1, 1000, 0, 0);
+	TrapezoidalMotionProfile motionProfile(100, 1, 1000, 0, 0);
 
 	const double maxVelocity = 100;
 	const double Kv = 1 / maxVelocity;
@@ -120,18 +94,18 @@ void operatorControl() {
 	unsigned long t;
 	unsigned long dt;
 	unsigned long lastT = 0;
-	TrapezoidalMotionPoint motionPoint;
+	TrapezoidalMotionProfile::Snapshot setpoint;
 
 	while (true) {
 		counts = encoderGet(encoder) - x0;
 		t = millis() - t0;
 
-		motionPoint = getMotionPoint(motionProfile, t);
-		error = motionPoint.x - counts;
+		setpoint = motionProfile.getSnapshot(t);
+		error = setpoint.x - counts;
 		dt = t - lastT;
-		derivative = (dt == 0) ? 0 : (error - lastError) / dt - motionPoint.v;
+		derivative = (dt == 0) ? 0 : (error - lastError) / dt - setpoint.v;
 
-		velocity = Kv * motionPoint.v + Ka * motionPoint.a + Kp * error + Kd * derivative;
+		velocity = Kv * setpoint.v + Ka * setpoint.a + Kp * error + Kd * derivative;
 		motorSetVelocityAtVolts(2, velocity, powerLevelMain() / 1000.0);
 
 		lastT = t;
@@ -139,5 +113,4 @@ void operatorControl() {
 
 		delay(10);
 	}
-	freeTrapezoidalMotionProfile(motionProfile);
 }
