@@ -76,6 +76,12 @@ void operatorControl() {
 
 	print("starting\n");
 
+	while (true) {
+		printf("bottom: %d, top: %d\n", analogRead(BOTTOM_POT), analogRead(TOP_POT));
+
+		delay(10);
+	}
+/*
 	TrapezoidalMotionProfile motionProfile(100, 1, 1000, 0, 0);
 
 	const double maxVelocity = 100;
@@ -94,7 +100,7 @@ void operatorControl() {
 	unsigned long t;
 	unsigned long dt;
 	unsigned long lastT = 0;
-	TrapezoidalMotionProfile::Snapshot setpoint;
+	MotionProfile::Snapshot setpoint;
 
 	while (true) {
 		counts = encoderGet(encoder) - x0;
@@ -103,7 +109,7 @@ void operatorControl() {
 		setpoint = motionProfile.getSnapshot(t);
 		error = setpoint.x - counts;
 		dt = t - lastT;
-		derivative = (dt == 0) ? 0 : (error - lastError) / dt - setpoint.v;
+		derivative = (dt == 0) ? 0 : ((error - lastError) / dt - setpoint.v);
 
 		velocity = Kv * setpoint.v + Ka * setpoint.a + Kp * error + Kd * derivative;
 		motorSetVelocityAtVolts(2, velocity, powerLevelMain() / 1000.0);
@@ -113,4 +119,5 @@ void operatorControl() {
 
 		delay(10);
 	}
+*/
 }

@@ -32,10 +32,8 @@
 extern "C" {
 #endif
 
-#define QUAD_TOP_PORT 1
-#define QUAD_BOTTOM_PORT 2
-
-Encoder encoder;
+#define BOTTOM_POT 1
+#define TOP_POT 2
 
 // A function prototype looks exactly like its declaration, but with a semicolon instead of
 // actual code. If a function does not match a prototype, compile errors will occur.
