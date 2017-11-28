@@ -16,6 +16,7 @@
 
 #include "bnsMath.hpp"
 #include "TrapezoidalMotionProfile.hpp"
+#include "PidController.hpp"
 
 using namespace std;
 using namespace bns;
@@ -76,10 +77,37 @@ void operatorControl() {
 
 	print("starting\n");
 
-	while (true) {
-		printf("bottom: %d, top: %d\n", analogRead(BOTTOM_POT), analogRead(TOP_POT));
+	const double maxVel = 1.80;
+	const double Kv = 100 / maxVel;
+	const double Ka = 10;
+	const double Kp = 0;
+	const double Ki = 0;
+	const double Kd = 0;
+	const unsigned long t0 = millis();
+	const int x0 = analogRead(BOTTOM_POT);
+	const TrapezoidalMotionProfile motionProfile(1.5, 0.01, x0, 1000);
 
-		delay(10);
+	PidController pidController(Kp, Ki, Kd);
+	unsigned long t;
+	int x;
+	double error;
+	int speed;
+	MotionProfile::Snapshot setpoint;
+int lastX = 0;
+long lastT = 0;
+	while (true) {
+		t = millis() - t0;
+		x = analogRead(BOTTOM_POT);
+
+		setpoint = motionProfile.getSnapshot(t);
+		error = setpoint.x - x;
+
+		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
+		motorSet(2, velocityPctToMotorSpeed(speed));
+printf("error: %d, vError: %f\n", (int)error, setpoint.v - (float)(x - lastX) / (t - lastT));
+lastX = x;
+lastT = t;
+		delay(20);
 	}
 /*
 	TrapezoidalMotionProfile motionProfile(100, 1, 1000, 0, 0);
