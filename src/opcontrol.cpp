@@ -14,7 +14,6 @@
 
 #include <math.h>
 
-#include "bnsMath.hpp"
 #include "TrapezoidalMotionProfile.hpp"
 #include "PidController.hpp"
 
@@ -35,13 +34,13 @@ int velocityPctToMotorSpeed(double velocityPct) {
 	if (velocityPct == 0) {
 		return 0;
 	}
-	double v = fabs(velocityPct);
+	double v = std::abs(velocityPct);
 	if (v > 0.99) {
-		return sgn(velocityPct) * 127;
+		return std::copysign(127, velocityPct);
 	}
-	return sgn(velocityPct) * ((((((((((-512553.361 * v + 2536180.47) * v - 5371392.274) * v
+	return std::copysign((((((((((-512553.361 * v + 2536180.47) * v - 5371392.274) * v
 			+ 6365170.363) * v - 4631143.823) * v + 2137181.669) * v - 624465.95) * v
-			+ 112018.51) * v - 11522.344) * v + 615.694) * v - 2.342);
+			+ 112018.51) * v - 11522.344) * v + 615.694) * v - 2.342, velocityPct);
 }
 
 enum MotorVelocity {
@@ -77,15 +76,16 @@ void operatorControl() {
 
 	print("starting\n");
 
-	const double maxVel = 1.80;
-	const double Kv = 100 / maxVel;
+	const double vMax = 1.80;
+	const double aMax = 0.01;
+	const double Kv = 100 / vMax;
 	const double Ka = 10;
 	const double Kp = 0;
 	const double Ki = 0;
 	const double Kd = 0;
 	const unsigned long t0 = millis();
 	const int x0 = analogRead(BOTTOM_POT);
-	const TrapezoidalMotionProfile motionProfile(1.5, 0.01, x0, 1000);
+	TrapezoidalMotionProfile motionProfile(vMax, aMax, x0, 1000);
 
 	PidController pidController(Kp, Ki, Kd);
 	unsigned long t;
@@ -98,7 +98,7 @@ void operatorControl() {
 		t = millis() - t0;
 		x = analogRead(BOTTOM_POT);
 
-		setpoint = motionProfile.getSnapshot(t);
+		setpoint = motionProfile.getSnapshot(x, t);
 		error = setpoint.x - x;
 
 		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
@@ -106,43 +106,4 @@ void operatorControl() {
 
 		delay(20);
 	}
-/*
-	TrapezoidalMotionProfile motionProfile(100, 1, 1000, 0, 0);
-
-	const double maxVelocity = 100;
-	const double Kv = 1 / maxVelocity;
-	const double Ka = 1.0;
-	const double Kp = 1.0;
-	const double Kd = 0;
-	const unsigned long t0 = millis();
-	const int x0 = encoderGet(encoder);
-
-	int counts;
-	int error;
-	int lastError;
-	double derivative;
-	double velocity;
-	unsigned long t;
-	unsigned long dt;
-	unsigned long lastT = 0;
-	MotionProfile::Snapshot setpoint;
-
-	while (true) {
-		counts = encoderGet(encoder) - x0;
-		t = millis() - t0;
-
-		setpoint = motionProfile.getSnapshot(t);
-		error = setpoint.x - counts;
-		dt = t - lastT;
-		derivative = (dt == 0) ? 0 : ((error - lastError) / dt - setpoint.v);
-
-		velocity = Kv * setpoint.v + Ka * setpoint.a + Kp * error + Kd * derivative;
-		motorSetVelocityAtVolts(2, velocity, powerLevelMain() / 1000.0);
-
-		lastT = t;
-		lastError = error;
-
-		delay(10);
-	}
-*/
 }
