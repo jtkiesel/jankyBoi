@@ -93,8 +93,7 @@ void operatorControl() {
 	double error;
 	int speed;
 	MotionProfile::Snapshot setpoint;
-int lastX = 0;
-long lastT = 0;
+
 	while (true) {
 		t = millis() - t0;
 		x = analogRead(BOTTOM_POT);
@@ -104,9 +103,7 @@ long lastT = 0;
 
 		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
 		motorSet(2, velocityPctToMotorSpeed(speed));
-printf("error: %d, vError: %f\n", (int)error, setpoint.v - (float)(x - lastX) / (t - lastT));
-lastX = x;
-lastT = t;
+
 		delay(20);
 	}
 /*

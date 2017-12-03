@@ -10,7 +10,8 @@ public:
 		double v;
 		double a;
 	};
-    virtual Snapshot getSnapshot(unsigned long t) const = 0;
+    virtual Snapshot getSnapshot(double error, unsigned long t) const = 0;
+	virtual bool isDone(unsigned long t) const = 0;
 };
 
 };  // namespace bns
