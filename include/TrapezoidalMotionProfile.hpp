@@ -7,15 +7,19 @@ namespace bns {
 
 class TrapezoidalMotionProfile : public MotionProfile {
 public:
-	TrapezoidalMotionProfile(double vLim, double aLim, double vi = 0, double vf = 0);
-	Snapshot getSnapshot(double error, unsigned long t) const;
+	TrapezoidalMotionProfile(double vLim, double aLim, double xi, double xf, double vi = 0, double vf = 0);
+	Snapshot getSnapshot(double x, unsigned long t);
 	bool isDone(unsigned long t) const;
 private:
 	const double vLim;
 	const double aLim;
+	const double xi;
+	const double xf;
 	const double vi;
 	const double vf;
-	mutable unsigned long tf;
+	double x1;
+	unsigned long t1;
+	unsigned long tf;
 };
 
 };  // namespace bns

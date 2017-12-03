@@ -10,7 +10,7 @@ public:
 		double v;
 		double a;
 	};
-    virtual Snapshot getSnapshot(double error, unsigned long t) const = 0;
+    virtual Snapshot getSnapshot(double x, unsigned long t) = 0;
 	virtual bool isDone(unsigned long t) const = 0;
 };
 
