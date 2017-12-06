@@ -26,6 +26,7 @@
 #define MAIN_HPP_
 
 #include <API.hpp>
+#include "JINX.hpp"
 
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus

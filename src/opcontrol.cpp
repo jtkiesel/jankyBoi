@@ -12,7 +12,7 @@
 
 #include "main.hpp"
 
-#include <math.h>
+#include <cmath>
 
 #include "TrapezoidalMotionProfile.hpp"
 #include "PidController.hpp"
@@ -98,11 +98,13 @@ void operatorControl() {
 		t = millis() - t0;
 		x = analogRead(BOTTOM_POT);
 
-		setpoint = motionProfile.getSnapshot(x, t);
+		setpoint = motionProfile.computeSnapshot(x, t);
 		error = setpoint.x - x;
 
 		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
 		motorSet(2, velocityPctToMotorSpeed(speed));
+
+		motionProfile.graph(x);
 
 		delay(20);
 	}

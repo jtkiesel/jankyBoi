@@ -42,4 +42,5 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
+	initJINX(stdout);
 }
