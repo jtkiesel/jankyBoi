@@ -1,22 +1,22 @@
 /**
- *JINX.c
+ * JINX.cpp
  *
- *Put this file in your src folder, and JINX.h in your include folder
- *Include JINX.h in your main.h
- *Call initJINX() and create start JINXRun in its own task in initialize()
+ * Put this file in your src folder, and JINX.hpp in your include folder
+ * Include JINX.hpp in your main.hpp
+ * Call initJINX() and create start JINXRun in its own task in initialize().
  *
- *User should replace body of parseMessage() with their own parser
- *They may of course create helper functions to call, if they desire.
- *An example helper function is defined in the space below
+ * User should replace body of parseMessage() with their own parser
+ * They may of course create helper functions to call, if they desire.
+ * An example helper function is defined in the space below.
  */
 
 #include "main.hpp"
 #include "JINX.hpp"
 
 //Port over which all serial communication will occur. STDIN == STDOUT, so either can be used
-static FILE* comPort = stdout;
+static PROS_FILE* comPort = stdout;
 
-void initJINX(FILE* port) {
+void initJINX(PROS_FILE* port) {
     //If the port is not a valid communications port, inform user of error
     if (!setComPort(port)) {
         //Would print to stderr, but not set for PROS
@@ -27,7 +27,7 @@ void initJINX(FILE* port) {
     }
 }
 
-bool setComPort(FILE* port) {
+bool setComPort(PROS_FILE* port) {
     //If the port is either of the UARTs, set up the pins correctly for serial data
     if (port == uart1 || port == uart2) {
         usartInit(port, 115200, SERIAL_8N1);
@@ -39,7 +39,7 @@ bool setComPort(FILE* port) {
     }
 
     #if(DEBUG_JINX)
-            printf("Failed to open specified port for JINX (setComPort(FILE* port))\n");
+            printf("Failed to open specified port for JINX (setComPort(PROS_FILE* port))\n");
     #endif
 
     return false;

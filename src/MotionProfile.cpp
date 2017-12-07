@@ -1,17 +1,22 @@
 #include "MotionProfile.hpp"
 
-#include "JINX.h"
-
-#include <string>
+#include "JINX.hpp"
 
 namespace bns {
 
 void MotionProfile::graph(double x) const {
 	Snapshot snap = getSnapshot();
-	writeJINXData("actual position", std::to_string(x).c_str());
-	writeJINXData("target position", std::to_string(snap.x).c_str());
-	writeJINXData("target velocity", std::to_string(snap.v).c_str());
-	writeJINXData("target acceleration", std::to_string(snap.a).c_str());
+	/*int size = 1077;
+	char arr[size];
+	sprintf(arr, "%f", x);
+	writeJINXData("actual position", arr);
+	sprintf(arr, "%f", snap.x);
+	writeJINXData("target position", arr);
+	sprintf(arr, "%f", snap.v);
+	writeJINXData("target velocity", arr);
+	sprintf(arr, "%f", snap.a);
+	writeJINXData("target acceleration", arr);*/
+	printf("%lu,%f,%f,%f,%f\n", millis(), x, snap.x, snap.v, snap.a);
 }
 
 };  // namespace bns

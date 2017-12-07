@@ -72,15 +72,15 @@ void motorSetVelocityAtVolts(unsigned char channel, double velocity, double volt
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-	delay(5000);
+	delay(3000);
 
 	print("starting\n");
 
 	const double vMax = 1.80;
 	const double aMax = 0.01;
 	const double Kv = 100 / vMax;
-	const double Ka = 10;
-	const double Kp = 0;
+	const double Ka = 1000;
+	const double Kp = 0.0001;
 	const double Ki = 0;
 	const double Kd = 0;
 	const unsigned long t0 = millis();
@@ -106,6 +106,6 @@ void operatorControl() {
 
 		motionProfile.graph(x);
 
-		delay(20);
+		delay(10);
 	}
 }

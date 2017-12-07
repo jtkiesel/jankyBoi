@@ -15,7 +15,7 @@ TrapezoidalMotionProfile::TrapezoidalMotionProfile(double vLim, double aLim, dou
 }
 
 MotionProfile::Snapshot TrapezoidalMotionProfile::computeSnapshot(double x, unsigned long t) {
-	double aSnap, vSnap, xSnap;
+	double xSnap = 0, vSnap = 0, aSnap = 0;
 
 	if (tf == 0) {
 		if (t < t1) {  // Acceleration
@@ -28,19 +28,18 @@ MotionProfile::Snapshot TrapezoidalMotionProfile::computeSnapshot(double x, unsi
 			aSnap = 0;
 		}
 		// Decelerate.  dx = (vf^2 - vi^2) / (2*a)
-		if (std::abs(xf - x) < std::abs((std::pow(vf, 2) - std::pow(vSnap, 2)) / (2 * aLim))) {
-			tf = t + std::abs((vf - vSnap) / aLim);  // Time after deceleration. t = (vf - v) / a
+		double t2 = std::abs((vf - vSnap) / aLim);
+		if (std::abs(xf - x) < std::abs(vf + vSnap) * t2 / 2) {
+			tf = t + t2;  // Time after deceleration. t = (vf - v) / a
 		}
 	}
 	if (tf != 0) {
-		if (t < tf) {
+		if (t < tf) {  // Deceleration.
 			const double t2 = tf - t;
-			// Deceleration.
 			xSnap = xf - vf * t2 - aLim * std::pow(t2, 2) / 2;
-			vSnap = vf - aLim * t2;  // v = vf - a*(tf - t)
+			vSnap = vf + aLim * t2;  // v = vf - a*(tf - t)
 			aSnap = -aLim;
-		} else {
-			// Done.
+		} else {  // Done.
 			xSnap = xf + vf * (t - tf);
 			vSnap = vf;
 			aSnap = 0;

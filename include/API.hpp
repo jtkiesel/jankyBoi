@@ -756,7 +756,7 @@ typedef int PROS_FILE;
  * backwards compatability with PROS, but also allows libraries such as newlib to be incorporated
  * into PROS projects. If you're not using C++/newlib, you can disregard this and just use FILE.
  */
-#define FILE PROS_FILE
+//#define FILE PROS_FILE
 #endif
 
 /**
