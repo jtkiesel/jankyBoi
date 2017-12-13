@@ -1,7 +1,6 @@
 #include "TrapezoidalMotionProfile.hpp"
 
-#include "API.hpp"
-
+#include <API.hpp>
 #include <cmath>
 
 namespace bns {
@@ -23,11 +22,11 @@ MotionProfile::Snapshot TrapezoidalMotionProfile::computeSnapshot(double x, unsi
 			vSnap = vi + aLim * t;  // v = vi + a*t
 			aSnap = aLim;
 		} else {  // Constant velocity.
-			xSnap = x1 + vLim * (t - t1);
+			xSnap = x1 + vLim * (t - t1);  // x = xi + v * t
 			vSnap = vLim;
 			aSnap = 0;
 		}
-		// Decelerate.  dx = (vf^2 - vi^2) / (2*a)
+		// Deceleration.
 		double t2 = std::abs((vf - vSnap) / aLim);
 		if (std::abs(xf - x) < std::abs(vf + vSnap) * t2 / 2) {
 			tf = t + t2;  // Time after deceleration. t = (vf - v) / a

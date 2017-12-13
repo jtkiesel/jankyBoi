@@ -10,10 +10,10 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "main.hpp"
-
 #include <cmath>
 
+#include "main.hpp"
+#include "constants.hpp"
 #include "TrapezoidalMotionProfile.hpp"
 #include "PidController.hpp"
 
@@ -76,15 +76,16 @@ void operatorControl() {
 
 	print("starting\n");
 
-	const double vMax = 1.80;
+	const double vMax = 1.176;
 	const double aMax = 0.01;
 	const double Kv = 100 / vMax;
 	const double Ka = 1000;
-	const double Kp = 0.0001;
+	const double Kp = 0;//.0001;
 	const double Ki = 0;
 	const double Kd = 0;
 	const unsigned long t0 = millis();
-	const int x0 = analogRead(BOTTOM_POT);
+	int x0;
+	imeGet(DRIVE_IME_LEFT, &x0);
 	TrapezoidalMotionProfile motionProfile(vMax, aMax, x0, 1000);
 
 	PidController pidController(Kp, Ki, Kd);
@@ -96,13 +97,13 @@ void operatorControl() {
 
 	while (true) {
 		t = millis() - t0;
-		x = analogRead(BOTTOM_POT);
+		imeGet(DRIVE_IME_LEFT, &x);
 
 		setpoint = motionProfile.computeSnapshot(x, t);
 		error = setpoint.x - x;
 
 		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
-		motorSet(2, velocityPctToMotorSpeed(speed));
+		motorSet(DRIVE_LEFT, velocityPctToMotorSpeed(speed));
 
 		motionProfile.graph(x);
 

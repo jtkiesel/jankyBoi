@@ -1,4 +1,4 @@
-/** @file main.h
+/** @file main.hpp
  * @brief Header file for global functions
  *
  * Any experienced C or C++ programmer knows the importance of header files. For those who
@@ -26,15 +26,11 @@
 #define MAIN_HPP_
 
 #include <API.hpp>
-#include "JINX.hpp"
 
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define BOTTOM_POT 1
-#define TOP_POT 2
 
 // A function prototype looks exactly like its declaration, but with a semicolon instead of
 // actual code. If a function does not match a prototype, compile errors will occur.
