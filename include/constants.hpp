@@ -26,7 +26,7 @@
 #define CONE_SONAR2         8
 
 // I2C sensors.
-#define DRIVE_IME_LEFT   1
-#define DRIVE_IME_RIGHT  2
+#define DRIVE_IME_LEFT   0
+#define DRIVE_IME_RIGHT  1
 
 #endif  // CONSTANTS_HPP_

@@ -10,9 +10,10 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
+#include "main.hpp"
+
 #include <cmath>
 
-#include "main.hpp"
 #include "constants.hpp"
 #include "TrapezoidalMotionProfile.hpp"
 #include "PidController.hpp"
@@ -21,37 +22,40 @@ using namespace std;
 using namespace bns;
 
 /**
- * Adjusts a target velocity based on the current battery voltage. Voltage is
- * passed in as a percentage of the "specified velocity" (100 RPM, 160 RPM, or
- * 240 RPM), and is returned as a percentage of the max velocity possible at the
- * passed in battery voltage.
+ * Adjusts a desired power based on the current battery voltage.
+ *
+ * @param power  Desired power.
+ * @param volts  Current battery voltage.
  */
-double batteryAdjustedVelocityPct(double velocityPct, double volts) {
-	return velocityPct / (0.1845977782 * volts - 0.08777418571);
+double batteryAdjustedPower(double power, double volts) {
+	return power / (0.1845977782 * volts - 0.08777418571);
 }
 
-int velocityPctToMotorSpeed(double velocityPct) {
-	if (velocityPct == 0) {
+/**
+ * Converts from output power to PWM value, in order to linearize motor output.
+ *
+ * @param power  Desired percentage of max power, between -1 and 1.
+ * @return       PWM value that will come closest to achieving the desired power.
+ */
+int powerToPwm(double power) {
+	if (power == 0) {
 		return 0;
 	}
-	double v = std::abs(velocityPct);
-	if (v > 0.99) {
-		return std::copysign(127, velocityPct);
+	double p = std::abs(power);
+	if (p >= 1) {
+		return std::copysign(127, power);
 	}
-	return std::copysign((((((((((-512553.361 * v + 2536180.47) * v - 5371392.274) * v
-			+ 6365170.363) * v - 4631143.823) * v + 2137181.669) * v - 624465.95) * v
-			+ 112018.51) * v - 11522.344) * v + 615.694) * v - 2.342, velocityPct);
+	return std::copysign(((((((((-44128.10541 * p + 178572.6802) * p - 297071.4563) * p
+			+ 262520.7547) * p - 132692.6561) * p + 38464.48054) * p - 6049.717501) * p
+			+ 476.2279947) * p - 1.233957961), power);
 }
 
-enum MotorVelocity {
-	MotorTorque = 100,
-	MotorSpeed = 160,
-	MotorTurbo = 240
-};
+void motorSetLinear(unsigned char channel, double power) {
+	motorSet(channel, powerToPwm(power));
+}
 
-void motorSetVelocityAtVolts(unsigned char channel, double velocity, double volts) {
-	//printf("motorSet at v: %f\n", velocity);
-	motorSet(channel, velocityPctToMotorSpeed(batteryAdjustedVelocityPct(velocity, volts)));
+void motorSetAtVolts(unsigned char channel, double power, double volts) {
+	motorSetLinear(channel, batteryAdjustedPower(power, volts));
 }
 
 /*
@@ -72,41 +76,51 @@ void motorSetVelocityAtVolts(unsigned char channel, double velocity, double volt
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
+	printf("starting\n");
 	delay(3000);
 
-	print("starting\n");
-
-	const double vMax = 1.176;
-	const double aMax = 0.01;
-	const double Kv = 100 / vMax;
-	const double Ka = 1000;
-	const double Kp = 0;//.0001;
+	const double vMax = 1.2;
+	const double aMax = 0.001;
+	const double KvFf = 1 / vMax;
+	const double KaFf = 150;
+	const double Kv = 1.5;
+	const double Kp = 0.01;
 	const double Ki = 0;
-	const double Kd = 0;
+	const double Kd = 0.01;
 	const unsigned long t0 = millis();
 	int x0;
+	imeReset(DRIVE_IME_LEFT);
 	imeGet(DRIVE_IME_LEFT, &x0);
 	TrapezoidalMotionProfile motionProfile(vMax, aMax, x0, 1000);
 
 	PidController pidController(Kp, Ki, Kd);
-	unsigned long t;
+	unsigned long t = 0;
 	int x;
-	double error;
-	int speed;
+	double xError;
+	double v;
+	double vError;
+	int xLast = x0;
+	unsigned long tLast = t0;
+	double power;
 	MotionProfile::Snapshot setpoint;
 
-	while (true) {
-		t = millis() - t0;
+	while (!motionProfile.isDone(t)) {
 		imeGet(DRIVE_IME_LEFT, &x);
-
 		setpoint = motionProfile.computeSnapshot(x, t);
-		error = setpoint.x - x;
+		v = (t - tLast) > 0 ? ((double)(x - xLast) / (t - tLast)) : setpoint.v;
 
-		speed = Kv * setpoint.v + Ka * setpoint.a + pidController.computeOutput(error, t);
-		motorSet(DRIVE_LEFT, velocityPctToMotorSpeed(speed));
+		xError = setpoint.x - x;
+		vError = setpoint.v - v;
 
+		power = KvFf * setpoint.v + KaFf * setpoint.a + Kv * vError + pidController.computeOutput(xError, t);
+		motorSetLinear(DRIVE_LEFT, power);
+
+printf("%f,", v);
 		motionProfile.graph(x);
 
-		delay(10);
+		delay(20);
+		xLast = x;
+		tLast = t;
+		t = millis() - t0;
 	}
 }

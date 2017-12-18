@@ -11,6 +11,7 @@
  */
 
 #include "main.hpp"
+#include "constants.hpp"
 
 extern "C" {
   void __libc_init_array();

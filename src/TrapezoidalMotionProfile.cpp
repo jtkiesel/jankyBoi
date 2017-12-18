@@ -7,8 +7,8 @@ namespace bns {
 
 TrapezoidalMotionProfile::TrapezoidalMotionProfile(double vLim, double aLim, double xi, double xf, double vi, double vf)
 		: mutex(mutexCreate()), vLim(std::copysign(vLim, xf - xi)), aLim(std::copysign(aLim, xf - xi)), xi(xi), xf(xf), vi(vi), vf(vf) {
-	t1 = std::abs((this->vLim - vi) / this->aLim);  // t = (vf - vi) / a
-	x1 = xi + (vi + this->vLim) * t1 / 2;  // d = (vi + vf) * t / 2
+	t1 = 0;  // t = (vf - vi) / a
+	x1 = 0;  // d = (vi + vf) * t / 2
 	tf = 0;
 	snapshot = {.x = 0, .v = 0, .a = 0};
 }
@@ -17,11 +17,19 @@ MotionProfile::Snapshot TrapezoidalMotionProfile::computeSnapshot(double x, unsi
 	double xSnap = 0, vSnap = 0, aSnap = 0;
 
 	if (tf == 0) {
-		if (t < t1) {  // Acceleration
+		if (t1 == 0) {
+			// Acceleration.
 			xSnap = xi + vi * t + aLim * std::pow(t, 2) / 2;  // x = xi + vi*t + (a*t^2)/2
 			vSnap = vi + aLim * t;  // v = vi + a*t
 			aSnap = aLim;
-		} else {  // Constant velocity.
+
+			if (vSnap > vLim) {
+				t1 = t;
+				x1 = xSnap;
+			}
+		}
+		if (t1 != 0) {
+			// Constant velocity.
 			xSnap = x1 + vLim * (t - t1);  // x = xi + v * t
 			vSnap = vLim;
 			aSnap = 0;
