@@ -815,7 +815,7 @@ void usartShutdown(PROS_FILE *usart);
 /**
  * The standard output stream uses the PC debug terminal.
  */
-extern const PROS_FILE *stdout;
+extern const PROS_FILE *out;
 /**
  * The standard input stream uses the PC debug terminal.
  */
