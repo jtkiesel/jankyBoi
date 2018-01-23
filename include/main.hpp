@@ -21,11 +21,9 @@
  */
 
 #ifndef MAIN_HPP_
-
-// This prevents multiple inclusion, which isn't bad for this file but is good practice
 #define MAIN_HPP_
 
-#include <API.hpp>
+#include "api.hpp"
 
 // Allow usage of this file in C++ programs
 #ifdef __cplusplus

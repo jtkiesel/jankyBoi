@@ -1,4 +1,4 @@
-/** @file API.hpp
+/** @file api.hpp
  * @brief Provides the high-level user functionality intended for use by typical VEX Cortex
  * programmers.
  *
@@ -22,42 +22,42 @@
 #define API_HPP_
 
 // System includes
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
-// Begin C++ extern to C
+// Allow usage of this file in C++ programs
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+namespace pros {
 
 // -------------------- VEX competition functions --------------------
 
 /**
  * DOWN button (valid on channels 5, 6, 7, 8)
  */
-#define JOY_DOWN 1
+constexpr unsigned char kJoyDown = 1;
 /**
  * LEFT button (valid on channels 7, 8)
  */
-#define JOY_LEFT 2
+constexpr unsigned char kJoyLeft = 2;
 /**
  * UP button (valid on channels 5, 6, 7, 8)
  */
-#define JOY_UP 4
+constexpr unsigned char kJoyUp = 4;
 /**
  * RIGHT button (valid on channels 7, 8)
  */
-#define JOY_RIGHT 8
+constexpr unsigned char kJoyRight = 8;
 /**
  * Analog axis for the X acceleration from the VEX Joystick.
  */
-#define ACCEL_X 5
+constexpr unsigned char kAccelX = 5;
 /**
  * Analog axis for the Y acceleration from the VEX Joystick.
  */
-#define ACCEL_Y 6
+constexpr unsigned char kJoyAccelY = 6;
 
 /**
  * Returns true if the robot is in autonomous mode, or false otherwise.
@@ -749,16 +749,6 @@ bool i2cWriteRegister(uint8_t addr, uint8_t reg, uint16_t value);
  */
 typedef int PROS_FILE;
 
-
-#ifndef FILE
-/**
- * For convenience, FILE is defined as PROS_FILE if it wasn't already defined. This provides
- * backwards compatability with PROS, but also allows libraries such as newlib to be incorporated
- * into PROS projects. If you're not using C++/newlib, you can disregard this and just use FILE.
- */
-//#define FILE PROS_FILE
-#endif
-
 /**
  * Bit mask for usartInit() for 8 data bits (typical)
  */
@@ -825,19 +815,19 @@ void usartShutdown(PROS_FILE *usart);
 /**
  * The standard output stream uses the PC debug terminal.
  */
-#define stdout ((PROS_FILE *)3)
+extern const PROS_FILE *stdout;
 /**
  * The standard input stream uses the PC debug terminal.
  */
-#define stdin ((PROS_FILE *)3)
+extern const PROS_FILE *in;
 /**
  * UART 1 on the Cortex; must be opened first using usartInit().
  */
-#define uart1 ((PROS_FILE *)1)
+extern const PROS_FILE *uart1;
 /**
  * UART 2 on the Cortex; must be opened first using usartInit().
  */
-#define uart2 ((PROS_FILE *)2)
+extern const PROS_FILE *uart2;
 
 #ifndef EOF
 /**
@@ -1137,15 +1127,15 @@ int sprintf(char *buffer, const char *formatString, ...);
 /**
  * LEFT button on LCD for use with lcdReadButtons()
  */
-#define LCD_BTN_LEFT 1
+constexpr unsigned char kLcdBtnLeft = 1;
 /**
  * CENTER button on LCD for use with lcdReadButtons()
  */
-#define LCD_BTN_CENTER 2
+constexpr unsigned char kLcdBtnCenter = 2;
 /**
  * RIGHT button on LCD for use with lcdReadButtons()
  */
-#define LCD_BTN_RIGHT 4
+constexpr unsigned char kLcdBtnRight = 4;
 
 /**
  * Clears the LCD screen on the specified port.
@@ -1229,29 +1219,29 @@ void lcdShutdown(PROS_FILE *lcdPort);
  * and VEX daemon task count against the limit. The user autonomous() or teleop() also counts
  * against the limit, so 12 tasks usually remain for other uses.
  */
-#define TASK_MAX 16
+constexpr int kTaskMax = 16;
 /**
  * The maximum number of available task priorities, which run from 0 to 5.
  *
  * Changing this value will not change the priority count without a kernel recompile.
  */
-#define TASK_MAX_PRIORITIES 6
+constexpr int kTaskMaxPriorities = 6;
 /**
  * The lowest priority that can be assigned to a task, which puts it on a level with the idle
  * task. This may cause severe performance problems and is generally not recommended.
  */
-#define TASK_PRIORITY_LOWEST 0
+constexpr int kTaskPriorityLowest = 0;
 /**
  * The default task priority, which should be used for most tasks.
  *
  * Default tasks such as autonomous() inherit this priority.
  */
-#define TASK_PRIORITY_DEFAULT 2
+constexpr int kTaskPriorityDefault = 2;
 /**
  * The highest priority that can be assigned to a task. Unlike the lowest priority, this
  * priority can be safely used without hampering interrupts. Beware of deadlock.
  */
-#define TASK_PRIORITY_HIGHEST (TASK_MAX_PRIORITIES - 1)
+constexpr int kTaskPriorityHighest = kTaskMaxPriorities - 1;
 /**
  * The recommended stack size for a new task that does an average amount of work. This stack
  * size is used for default tasks such as autonomous().
@@ -1259,7 +1249,7 @@ void lcdShutdown(PROS_FILE *lcdPort);
  * This is probably OK for 4-5 levels of function calls and the use of printf() with several
  * arguments. Tasks requiring deep recursion or large local buffers will need a bigger stack.
  */
-#define TASK_DEFAULT_STACK_SIZE 512
+constexpr int kTaskDefaultStackSize = 512;
 /**
  * The minimum stack depth for a task. Scheduler state is stored on the stack, so even if the
  * task never uses the stack, at least this much space must be allocated.
@@ -1267,30 +1257,30 @@ void lcdShutdown(PROS_FILE *lcdPort);
  * Function calls and other seemingly innocent constructs may place information on the stack.
  * Err on the side of a larger stack when possible.
  */
-#define TASK_MINIMAL_STACK_SIZE	64
+constexpr int kTaskMinimalStackSize = 64;
 
 /**
  * Constant returned from taskGetState() when the task is dead or nonexistant.
  */
-#define TASK_DEAD 0
+constexpr int kTaskDead = 0;
 /**
  * Constant returned from taskGetState() when the task is actively executing.
  */
-#define TASK_RUNNING 1
+constexpr int kTaskRunning = 1;
 /**
  * Constant returned from taskGetState() when the task is exists and is available to run, but
  * not currently running.
  */
-#define TASK_RUNNABLE 2
+constexpr int kTaskRunnable = 2;
 /**
  * Constant returned from taskGetState() when the task is delayed or blocked waiting for a
  * semaphore, mutex, or I/O operation.
  */
-#define TASK_SLEEPING 3
+constexpr int kTaskSleeping = 3;
 /**
  * Constant returned from taskGetState() when the task is suspended using taskSuspend().
  */
-#define TASK_SUSPENDED 4
+constexpr int kTaskSuspended = 4;
 
 /**
  * Type by which tasks are referenced.
@@ -1610,7 +1600,9 @@ void watchdogInit();
  */
 void standaloneModeEnable();
 
-// End C++ extern to C
+}  // namespace pros
+
+// End C++ export structure
 #ifdef __cplusplus
 }
 #endif

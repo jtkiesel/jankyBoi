@@ -26,4 +26,4 @@ double PidController::getOutput() const {
 	return output;
 }
 
-};  // namespace bns
+}  // namespace bns

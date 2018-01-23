@@ -10,8 +10,9 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
-#include "main.hpp"
+#include "api.hpp"
 #include "constants.hpp"
+#include "main.hpp"
 
 extern "C" {
   void __libc_init_array();
@@ -26,7 +27,6 @@ extern "C" {
  * configure a UART port (usartOpen()) but cannot set up an LCD (lcdInit()).
  */
 void initializeIO() {
-    __libc_init_array();
 }
 
 /*
@@ -43,5 +43,6 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	imeInitializeAll();
+    __libc_init_array();
+	pros::imeInitializeAll();
 }

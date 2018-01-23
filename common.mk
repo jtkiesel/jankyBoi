@@ -8,7 +8,7 @@ DEVICE=VexCortex
 # Libraries to include in the link (use -L and -l) e.g. -lm, -lmyLib
 LIBRARIES=$(wildcard $(ROOT)/firmware/*.a) -lgcc -lm
 # Prefix for ARM tools (must be on the path)
-MCUPREFIX=arm-none-eabi-
+MCUPREFIX=~/opt/gcc-arm-none-eabi-7-2017-q4-major/bin/arm-none-eabi-
 # Flags for the assembler
 MCUAFLAGS=-mthumb -mcpu=cortex-m3 -mlittle-endian
 # Flags for the compiler
@@ -36,7 +36,7 @@ OUTNAME=output.elf
 # Flags for programs
 AFLAGS:=$(MCUAFLAGS)
 ARFLAGS:=$(MCUCFLAGS)
-CCFLAGS:=-c -Wall $(MCUCFLAGS) -Os -ffunction-sections -fsigned-char -fomit-frame-pointer -fsingle-precision-constant
+CCFLAGS:=-c -Wall -pedantic -Wextra -Wconversion -Wmissing-include-dirs -Wno-sized-deallocation -Wno-psabi $(MCUCFLAGS) -O2 -ffunction-sections -fsigned-char -fomit-frame-pointer
 CFLAGS:=$(CCFLAGS) -std=gnu99 -Werror=implicit-function-declaration
 CPPFLAGS:=$(CCFLAGS) -fno-exceptions -fno-rtti -felide-constructors
 LDFLAGS:=-Wall $(MCUCFLAGS) $(MCULFLAGS) -Wl,--gc-sections

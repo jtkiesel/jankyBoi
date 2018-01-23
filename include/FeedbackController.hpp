@@ -9,6 +9,6 @@ public:
 	virtual double getOutput() const = 0;
 };
 
-};  // namespace bns
+}  // namespace bns
 
 #endif  // FEEDBACKCONTROLLER_HPP_

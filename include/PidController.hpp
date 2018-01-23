@@ -20,6 +20,6 @@ private:
 	double output;
 };
 
-};  // namespace bns
+}  // namespace bns
 
 #endif  // PIDCONTROLLER_HPP_

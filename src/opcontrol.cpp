@@ -10,16 +10,11 @@
  * obtained from http://sourceforge.net/projects/freertos/files/ or on request.
  */
 
+#include "api.hpp"
+#include "constants.hpp"
 #include "main.hpp"
 
 #include <cmath>
-
-#include "constants.hpp"
-#include "TrapezoidalMotionProfile.hpp"
-#include "PidController.hpp"
-
-using namespace std;
-using namespace bns;
 
 /**
  * Adjusts a desired power based on the current battery voltage.
@@ -38,24 +33,24 @@ double batteryAdjustedPower(double power, double volts) {
  * @return       PWM value that will come closest to achieving the desired power.
  */
 int powerToPwm(double power) {
-	if (power == 0) {
+	if (power == 0.0) {
 		return 0;
 	}
 	double p = std::abs(power);
-	if (p >= 1) {
-		return std::copysign(127, power);
+	if (p >= 1.0) {
+		return (int)std::round(std::copysign(127.0, power));
 	}
-	return std::copysign(((((((((-44128.10541 * p + 178572.6802) * p - 297071.4563) * p
-			+ 262520.7547) * p - 132692.6561) * p + 38464.48054) * p - 6049.717501) * p
-			+ 476.2279947) * p - 1.233957961), power);
+	return (int)std::round(std::copysign(((((((((-44128.10541 * p + 178572.6802) * p
+			- 297071.4563) * p + 262520.7547) * p - 132692.6561) * p + 38464.48054) * p
+			- 6049.717501) * p + 476.2279947) * p - 1.233957961), power));
 }
 
-void motorSetLinear(unsigned char channel, double power) {
-	motorSet(channel, powerToPwm(power));
+void motorSetLinear(unsigned char port, double power) {
+	pros::motorSet(port, powerToPwm(power));
 }
 
-void motorSetAtVolts(unsigned char channel, double power, double volts) {
-	motorSetLinear(channel, batteryAdjustedPower(power, volts));
+void motorSetAtVolts(unsigned char port, double power, double volts) {
+	motorSetLinear(port, batteryAdjustedPower(power, volts));
 }
 
 /*
@@ -76,51 +71,7 @@ void motorSetAtVolts(unsigned char channel, double power, double volts) {
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
-	printf("starting\n");
-	delay(3000);
-
-	const double vMax = 1.2;
-	const double aMax = 0.001;
-	const double KvFf = 1 / vMax;
-	const double KaFf = 150;
-	const double Kv = 1.5;
-	const double Kp = 0.01;
-	const double Ki = 0;
-	const double Kd = 0.01;
-	const unsigned long t0 = millis();
-	int x0;
-	imeReset(DRIVE_IME_LEFT);
-	imeGet(DRIVE_IME_LEFT, &x0);
-	TrapezoidalMotionProfile motionProfile(vMax, aMax, x0, 1000);
-
-	PidController pidController(Kp, Ki, Kd);
-	unsigned long t = 0;
-	int x;
-	double xError;
-	double v;
-	double vError;
-	int xLast = x0;
-	unsigned long tLast = t0;
-	double power;
-	MotionProfile::Snapshot setpoint;
-
-	while (!motionProfile.isDone(t)) {
-		imeGet(DRIVE_IME_LEFT, &x);
-		setpoint = motionProfile.computeSnapshot(x, t);
-		v = (t - tLast) > 0 ? ((double)(x - xLast) / (t - tLast)) : setpoint.v;
-
-		xError = setpoint.x - x;
-		vError = setpoint.v - v;
-
-		power = KvFf * setpoint.v + KaFf * setpoint.a + Kv * vError + pidController.computeOutput(xError, t);
-		motorSetLinear(DRIVE_LEFT, power);
-
-printf("%f,", v);
-		motionProfile.graph(x);
-
-		delay(20);
-		xLast = x;
-		tLast = t;
-		t = millis() - t0;
+	while (true) {
+		pros::delay(20);
 	}
 }
