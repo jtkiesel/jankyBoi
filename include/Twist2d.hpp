@@ -12,14 +12,17 @@ namespace bns {
 class Twist2d {
 public:
 	static const Twist2d identity();
-	const double kDx;
-	const double kDy;
-	const double kDtheta;
 	Twist2d();
 	Twist2d(double dx, double dy, double dtheta);
+	double dx() const;
+	double dy() const;
+	double dtheta() const;
 	Twist2d scaled(double s) const;
 protected:
 	static const Twist2d kIdentity;
+	double mDx;
+	double mDy;
+	double mDtheta;
 };
 
 }  // namespace bns

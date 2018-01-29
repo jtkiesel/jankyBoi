@@ -10,6 +10,7 @@ class MotionState {
 public:
 	static constexpr double kEpsilon = 1E-6;
 	static const MotionState kInvalidState;
+	MotionState();
 	MotionState(double t, double pos, double vel, double acc);
 	MotionState(const MotionState &state);
 	double t() const;
@@ -42,6 +43,7 @@ public:
 	 * @return     The time when we are next at pos() if we are extrapolating with a positive dt. NaN if we never reach pos.
 	 */
 	double nextTimeAtPos(double pos) const;
+	bool isValid() const;
 	/**
 	 * Checks if two MotionStates are epsilon-equals (all fields are equal within a nominal tolerance).
 	 */

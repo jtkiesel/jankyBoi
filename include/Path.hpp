@@ -22,7 +22,79 @@ namespace bns {
  */
 class Path {
 public:
+	/**
+	 * A waypoint along a path. Contains a position, radius (for creating curved
+	 * paths), and velocity. The information from these waypoints is used by the
+	 * PathBuilder class to generate Paths. Waypoints also contain an optional
+	 * marker that is used by the WaitForPathMarkerAction.
+	 *
+	 * @see PathBuilder
+	 * @see WaitForPathMarkerAction
+	 */
+	class Waypoint {
+	public:
+		Waypoint(double x, double y, double radius, double vel);
+		Waypoint(double x, double y, double radius, double vel, std::string marker);
+		Waypoint(Translation2d pos, double radius, double vel);
+		Waypoint(Translation2d pos, double radius, double vel, std::string marker);
+		Waypoint(const Waypoint &other);
+		Translation2d pos() const;
+		double radius() const;
+		double vel() const;
+		std::string marker() const;
+	protected:
+		Translation2d mPos;
+		double mRadius;
+		double mVel;
+		std::string mMarker;
+	};
+	/**
+	 * A Line is formed by two Waypoints. Contains a start and end position,
+	 * slope, and velocity.
+	 */
+	class Line {
+	public:
+		Line(Waypoint a, Waypoint b);
+		Waypoint pointA() const;
+		Waypoint pointB() const;
+		Translation2d start() const;
+		Translation2d end() const;
+		Translation2d slope() const;
+		double vel() const;
+	protected:
+		Waypoint mPointA;
+		Waypoint mPointB;
+		Translation2d mSlope;
+		Translation2d mStart;
+		Translation2d mEnd;
+		double mVel;
+	private:
+		void addToPath(Path path, double endVel);
+	};
+	/**
+	 * An Arc is formed by two Lines that share a common Waypoint. Contains a
+	 * center position, radius, and velocity.
+	 */
+	class Arc {
+	public:
+		Arc(Waypoint pointA, Waypoint pointB, Waypoint pointC);
+		Arc(Line lineA, Line lineB);
+		Line lineA() const;
+		Line lineB() const;
+		Translation2d center() const;
+		double radius() const;
+		double vel() const;
+	protected:
+		Line mLineA;
+		Line mLineB;
+		Translation2d mCenter;
+		double mRadius;
+		double mVel;
+	private:
+		static Translation2d intersect(Line lineA, Line lineB);
+	};
 	Path();
+	Path(std::vector<Waypoint> waypoints);
 	void extrapolateLast();
 	Translation2d endPos() const;
 	/**
@@ -31,6 +103,8 @@ public:
 	 * @param segment  The segment to add.
 	 */
 	void addSegment(PathSegment segment);
+	void addLine(Line line, double endVel);
+	void addArc(Arc arc);
 	/**
 	 * @return The last MotionState in the Path.
 	 */
@@ -93,6 +167,9 @@ protected:
 	std::deque<PathSegment> mSegments;
 	PathSegment mPrevSegment;
 	std::unordered_set<std::string> mCrossedMarkers;
+private:
+	static constexpr double kEpsilon = 1E-9;
+	static constexpr double kReallyBigNumber = 1E9;
 };
 
 }  // namespace bns

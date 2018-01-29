@@ -1,6 +1,5 @@
 #include "Rotation2d.hpp"
 
-#include "cpp.hpp"
 #include "Translation2d.hpp"
 #include "util.hpp"
 

@@ -8,6 +8,7 @@ namespace bns {
  */
 class MotionProfileConstraints {
 public:
+	MotionProfileConstraints();
 	MotionProfileConstraints(double maxVel, double maxAcc);
 	/**
 	 * @return The (positive) maximum allowed velocity.

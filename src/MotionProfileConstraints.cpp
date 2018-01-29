@@ -1,8 +1,13 @@
 #include "MotionProfileConstraints.hpp"
 
+#include "util.hpp"
+
 #include <cmath>
 
 namespace bns {
+
+MotionProfileConstraints::MotionProfileConstraints() :
+		MotionProfileConstraints(kInfinity, kInfinity) {}
 
 MotionProfileConstraints::MotionProfileConstraints(double maxVel, double maxAcc) :
 		mMaxVel(std::abs(maxVel)), mMaxAcc(std::abs(maxAcc)) {}

@@ -24,18 +24,18 @@ RigidTransform2d::RigidTransform2d(const RigidTransform2d &other) :
 		mTranslation(other.mTranslation), mRotation(other.mRotation) {}
 
 RigidTransform2d RigidTransform2d::exp(Twist2d delta) {
-	double sinTheta = std::sin(delta.kDtheta);
-	double cosTheta = std::cos(delta.kDtheta);
+	double sinTheta = std::sin(delta.dtheta());
+	double cosTheta = std::cos(delta.dtheta());
 	double s, c;
-	if (std::abs(delta.kDtheta) < kEpsilon) {
-		s = 1.0 - 1.0 / 6.0 * delta.kDtheta * delta.kDtheta;
-		c = 0.5 * delta.kDtheta;
+	if (std::abs(delta.dtheta()) < kEpsilon) {
+		s = 1.0 - 1.0 / 6.0 * delta.dtheta() * delta.dtheta();
+		c = 0.5 * delta.dtheta();
 	} else {
-		s = sinTheta / delta.kDtheta;
-		c = (1.0 - cosTheta) / delta.kDtheta;
+		s = sinTheta / delta.dtheta();
+		c = (1.0 - cosTheta) / delta.dtheta();
 	}
-	return RigidTransform2d(Translation2d(delta.kDx * s - delta.kDy * c,
-			delta.kDx * c + delta.kDy * s), Rotation2d(cosTheta, sinTheta, false));
+	return RigidTransform2d(Translation2d(delta.dx() * s - delta.dy() * c,
+			delta.dx() * c + delta.dy() * s), Rotation2d(cosTheta, sinTheta, false));
 }
 
 Twist2d RigidTransform2d::log(RigidTransform2d transform) {
@@ -96,7 +96,7 @@ Translation2d RigidTransform2d::intersection(RigidTransform2d other) const {
 
 bool RigidTransform2d::isColinear(RigidTransform2d other) const {
 	const Twist2d twist = log(inverse().transformBy(other));
-	return epsilonEquals(twist.kDy, 0.0, kEpsilon) && epsilonEquals(twist.kDtheta, 0.0, kEpsilon);
+	return epsilonEquals(twist.dy(), 0.0, kEpsilon) && epsilonEquals(twist.dtheta(), 0.0, kEpsilon);
 }
 
 Translation2d RigidTransform2d::intersection(RigidTransform2d a, RigidTransform2d b) {
@@ -113,10 +113,10 @@ Translation2d RigidTransform2d::intersection(RigidTransform2d a, RigidTransform2
 
 RigidTransform2d RigidTransform2d::interpolate(RigidTransform2d other, double x) const {
 	if (x <= 0.0) {
-		return RigidTransform2d(*this);
+		return *this;
 	}
 	if (x >= 1.0) {
-		return RigidTransform2d(other);
+		return other;
 	}
 	return transformBy(exp(log(inverse().transformBy(other)).scaled(x)));
 }

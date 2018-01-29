@@ -8,6 +8,8 @@ namespace bns {
 
 const MotionState MotionState::kInvalidState = MotionState(kNaN, kNaN, kNaN, kNaN);
 
+MotionState::MotionState() : MotionState(kInvalidState) {};
+
 MotionState::MotionState(double t, double pos, double vel, double acc) : mT(t), mPos(pos), mVel(vel), mAcc(acc) {}
 
 MotionState::MotionState(const MotionState &other) : MotionState(other.mT, other.mPos, other.mVel, other.mAcc) {}
@@ -79,12 +81,19 @@ double MotionState::nextTimeAtPos(double pos) const {
 	return kNaN;
 }
 
+bool MotionState::isValid() const {
+	return !std::isnan(mT) || !std::isnan(mPos) || !std::isnan(mVel) || !std::isnan(mAcc);
+}
+
 bool MotionState::equals(MotionState other) const {
 	return equals(other, kEpsilon);
 }
 
 bool MotionState::equals(MotionState other, double epsilon) const {
-	return coincident(other, epsilon) && epsilonEquals(mAcc, other.mAcc, epsilon);
+	bool bothInvalid = std::isnan(mT) && std::isnan(other.mT) && std::isnan(mPos)
+			&& std::isnan(other.mPos) && std::isnan(mVel) && std::isnan(other.mVel)
+			&& std::isnan(mAcc) && std::isnan(other.mAcc);
+	return bothInvalid || (coincident(other, epsilon) && epsilonEquals(mAcc, other.mAcc, epsilon));
 }
 
 bool MotionState::coincident(MotionState other) const {

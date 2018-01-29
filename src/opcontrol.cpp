@@ -13,6 +13,7 @@
 #include "api.hpp"
 #include "constants.hpp"
 #include "main.hpp"
+#include "PathFollowerTest.hpp"
 
 #include <cmath>
 
@@ -71,6 +72,7 @@ void motorSetAtVolts(unsigned char port, double power, double volts) {
  * This task should never exit; it should end with some kind of infinite loop, even if empty.
  */
 void operatorControl() {
+	bns::testPathFollower();
 	while (true) {
 		pros::delay(20);
 	}
