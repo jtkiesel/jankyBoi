@@ -126,7 +126,16 @@ void MotionProfile::appendSegment(MotionSegment segment) {
 }
 
 void MotionProfile::appendProfile(MotionProfile profile) {
-	mSegments.insert(mSegments.end(), profile.mSegments.begin(), profile.mSegments.end());
+	for (MotionSegment s : profile.mSegments) {
+		mSegments.push_back(s);
+	}
+}
+
+void MotionProfile::flipSegments() {
+	for (MotionSegment s : mSegments) {
+		s.setStart(s.start().flipped());
+		s.setEnd(s.end().flipped());
+	}
 }
 
 int MotionProfile::size() const {

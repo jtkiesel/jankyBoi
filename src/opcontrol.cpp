@@ -15,45 +15,6 @@
 #include "main.hpp"
 #include "PathFollowerTest.hpp"
 
-#include <cmath>
-
-/**
- * Adjusts a desired power based on the current battery voltage.
- *
- * @param power  Desired power.
- * @param volts  Current battery voltage.
- */
-double batteryAdjustedPower(double power, double volts) {
-	return power / (0.1845977782 * volts - 0.08777418571);
-}
-
-/**
- * Converts from output power to PWM value, in order to linearize motor output.
- *
- * @param power  Desired percentage of max power, between -1 and 1.
- * @return       PWM value that will come closest to achieving the desired power.
- */
-int powerToPwm(double power) {
-	if (power == 0.0) {
-		return 0;
-	}
-	double p = std::abs(power);
-	if (p >= 1.0) {
-		return (int)std::round(std::copysign(127.0, power));
-	}
-	return (int)std::round(std::copysign(((((((((-44128.10541 * p + 178572.6802) * p
-			- 297071.4563) * p + 262520.7547) * p - 132692.6561) * p + 38464.48054) * p
-			- 6049.717501) * p + 476.2279947) * p - 1.233957961), power));
-}
-
-void motorSetLinear(unsigned char port, double power) {
-	pros::motorSet(port, powerToPwm(power));
-}
-
-void motorSetAtVolts(unsigned char port, double power, double volts) {
-	motorSetLinear(port, batteryAdjustedPower(power, volts));
-}
-
 /*
  * Runs the user operator control code. This function will be started in its own task with the
  * default priority and stack size whenever the robot is enabled via the Field Management System

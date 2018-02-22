@@ -10,6 +10,11 @@
 
 namespace bns {
 
+SetpointGenerator::Setpoint::Setpoint() : Setpoint(MotionState::kInvalidState, false) {}
+
+SetpointGenerator::Setpoint::Setpoint(MotionState motionState, bool finalSetpoint) :
+		motionState(motionState), finalSetpoint(finalSetpoint) {}
+
 SetpointGenerator::SetpointGenerator() {
 	reset();
 }

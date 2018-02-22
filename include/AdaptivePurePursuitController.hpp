@@ -7,8 +7,6 @@
 #include "Translation2d.hpp"
 #include "Twist2d.hpp"
 
-#include <string>
-
 namespace bns {
 
 /**
@@ -25,7 +23,7 @@ class AdaptivePurePursuitController {
 public:
 	class Command {
 	public:
-		Twist2d delta = Twist2d::identity();
+		Twist2d delta;
 		double crossTrackError;
 		double maxVel;
 		double endVel;
@@ -43,7 +41,7 @@ public:
 	 * @return Movement command for the robot to follow.
 	 */
 	Command update(RigidTransform2d pose);
-	bool hasPassedMarker(std::string marker) const;
+	bool hasPassedMarker(unsigned long marker) const;
 	class Arc {
 	public:
 		Translation2d center;
@@ -93,11 +91,11 @@ public:
 protected:
 	Path mPath;
 	bool mAtEndOfPath;
-	const bool mReversed;
-	const Lookahead mLookahead;
 private:
 	static constexpr double kReallyBigNumber = 1E6;
 	static constexpr double kEpsilon = 1E-6;
+	bool mReversed;
+	Lookahead mLookahead;
 };
 
 }  // namespace bns

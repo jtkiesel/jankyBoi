@@ -104,6 +104,7 @@ public:
 	 * @param profile  The profile to add.
 	 */
 	void appendProfile(MotionProfile profile);
+	void flipSegments();
 	/**
 	 * @return The number of segments.
 	 */

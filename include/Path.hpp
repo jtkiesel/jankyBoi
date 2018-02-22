@@ -7,8 +7,7 @@
 #include "Translation2d.hpp"
 
 #include <deque>
-#include <string>
-#include <unordered_set>
+#include <vector>
 
 namespace bns {
 
@@ -34,19 +33,19 @@ public:
 	class Waypoint {
 	public:
 		Waypoint(double x, double y, double radius, double vel);
-		Waypoint(double x, double y, double radius, double vel, std::string marker);
+		Waypoint(double x, double y, double radius, double vel, unsigned long marker);
 		Waypoint(Translation2d pos, double radius, double vel);
-		Waypoint(Translation2d pos, double radius, double vel, std::string marker);
+		Waypoint(Translation2d pos, double radius, double vel, unsigned long marker);
 		Waypoint(const Waypoint &other);
 		Translation2d pos() const;
 		double radius() const;
 		double vel() const;
-		std::string marker() const;
+		unsigned long marker() const;
 	protected:
 		Translation2d mPos;
 		double mRadius;
 		double mVel;
-		std::string mMarker;
+		unsigned long mMarker;
 	};
 	/**
 	 * A Line is formed by two Waypoints. Contains a start and end position,
@@ -162,11 +161,11 @@ public:
 	 * down in time.
 	 */
 	void verifyVels();
-	bool hasPassedMarker(std::string marker) const;
+	bool hasPassedMarker(unsigned long marker) const;
 protected:
 	std::deque<PathSegment> mSegments;
 	PathSegment mPrevSegment;
-	std::unordered_set<std::string> mCrossedMarkers;
+	std::vector<unsigned long> mCrossedMarkers;
 private:
 	static constexpr double kEpsilon = 1E-9;
 	static constexpr double kReallyBigNumber = 1E9;

@@ -2,28 +2,29 @@
 
 #include "api.hpp"
 #include "Constants.hpp"
+#include "cpp.hpp"
 #include "Lookahead.hpp"
 #include "MotionState.hpp"
 #include "PathSegment.hpp"
 #include "RigidTransform2d.hpp"
 #include "Translation2d.hpp"
 
+#include <algorithm>
 #include <cmath>
-#include <string>
 #include <vector>
 
 namespace bns {
 
 Path::Waypoint::Waypoint(double x, double y, double radius, double vel) :
-		Waypoint(Translation2d(x, y), radius, vel, "") {}
+		Waypoint(Translation2d(x, y), radius, vel) {}
 
-Path::Waypoint::Waypoint(double x, double y, double radius, double vel, std::string marker) :
+Path::Waypoint::Waypoint(double x, double y, double radius, double vel, unsigned long marker) :
 		Waypoint(Translation2d(x, y), radius, vel, marker) {}
 
 Path::Waypoint::Waypoint(Translation2d pos, double radius, double vel) :
-		Waypoint(pos, radius, vel, "") {}
+		Waypoint(pos, radius, vel, 0) {}
 
-Path::Waypoint::Waypoint(Translation2d pos, double radius, double vel, std::string marker) :
+Path::Waypoint::Waypoint(Translation2d pos, double radius, double vel, unsigned long marker) :
 		mPos(pos), mRadius(radius), mVel(vel), mMarker(marker) {}
 
 Path::Waypoint::Waypoint(const Waypoint &other) :
@@ -41,7 +42,7 @@ double Path::Waypoint::vel() const {
 	return mRadius;
 }
 
-std::string Path::Waypoint::marker() const {
+unsigned long Path::Waypoint::marker() const {
 	return mMarker;
 }
 
@@ -68,6 +69,10 @@ Translation2d Path::Line::end() const {
 
 Translation2d Path::Line::slope() const {
 	return mSlope;
+}
+
+double Path::Line::vel() const {
+	return mVel;
 }
 
 Path::Arc::Arc(Waypoint pointA, Waypoint pointB, Waypoint pointC) :
@@ -105,9 +110,9 @@ Translation2d Path::Arc::intersect(Line lineA, Line lineB) {
 
 Path::Path() {}
 
-Path::Path(std::vector<Path::Waypoint> waypoints) {
+Path::Path(std::vector<Waypoint> waypoints) {
 	int size = waypoints.size();
-	if (size) {
+	if (size < 2) {
 		pros::printf("Error: Path must contain at lease 2 waypoints.\n");
 		return;
 	}
@@ -134,13 +139,8 @@ void Path::addSegment(PathSegment segment) {
 void Path::addLine(Line line, double endVel) {
 	double pathLength = Translation2d(line.end(), line.start()).norm();
 	if (pathLength > kEpsilon) {
-		if (!line.pointB().marker().empty()) {
-			addSegment(PathSegment(line.start().x(), line.start().y(), line.end().x(), line.end().y(),
-					line.pointB().vel(), lastMotionState(), endVel, line.pointB().marker()));
-		} else {
-			addSegment(PathSegment(line.start().x(), line.start().y(), line.end().x(), line.end().y(),
-					line.pointB().vel(), lastMotionState(), endVel));
-		}
+		addSegment(PathSegment(line.start().x(), line.start().y(), line.end().x(), line.end().y(),
+				line.pointB().vel(), lastMotionState(), endVel, line.pointB().marker()));
 	}
 }
 
@@ -211,10 +211,10 @@ void Path::checkSegmentDone(Translation2d robotPos) {
 }
 
 void Path::removeCurrentSegment() {
-	std::string marker = mSegments.front().marker();
+	unsigned long marker = mSegments.front().marker();
 	mSegments.pop_front();
-	if (!marker.empty()) {
-		mCrossedMarkers.insert(marker);
+	if (marker != 0) {
+		mCrossedMarkers.push_back(marker);
 	}
 }
 
@@ -236,8 +236,8 @@ void Path::verifyVels() {
 	}
 }
 
-bool Path::hasPassedMarker(std::string marker) const {
-	return mCrossedMarkers.find(marker) != mCrossedMarkers.end();
+bool Path::hasPassedMarker(unsigned long marker) const {
+	return std::find(mCrossedMarkers.begin(), mCrossedMarkers.end(), marker) != mCrossedMarkers.end();
 }
 
 }  // namespace bns

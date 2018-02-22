@@ -8,7 +8,7 @@ namespace bns {
 
 const MotionState MotionState::kInvalidState = MotionState(kNaN, kNaN, kNaN, kNaN);
 
-MotionState::MotionState() : MotionState(kInvalidState) {};
+MotionState::MotionState() : MotionState(kInvalidState) {}
 
 MotionState::MotionState(double t, double pos, double vel, double acc) : mT(t), mPos(pos), mVel(vel), mAcc(acc) {}
 

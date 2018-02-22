@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
 
 namespace bns {
 
@@ -54,7 +53,7 @@ AdaptivePurePursuitController::Command AdaptivePurePursuitController::update(Rig
 			report.lookaheadPoint, report.remainingPathDist);
 }
 
-bool AdaptivePurePursuitController::hasPassedMarker(std::string marker) const {
+bool AdaptivePurePursuitController::hasPassedMarker(unsigned long marker) const {
 	return mPath.hasPassedMarker(marker);
 }
 

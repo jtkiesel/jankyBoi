@@ -44,5 +44,4 @@ void initializeIO() {
  */
 void initialize() {
     __libc_init_array();
-	pros::imeInitializeAll();
 }

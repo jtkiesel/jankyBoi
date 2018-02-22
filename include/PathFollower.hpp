@@ -8,8 +8,6 @@
 #include "RigidTransform2d.hpp"
 #include "Twist2d.hpp"
 
-#include <string>
-
 namespace bns {
 
 /**
@@ -43,22 +41,35 @@ public:
 	};
 	class Parameters {
 	public:
-		const Lookahead kLookahead;
-		const double kInertiaGain;
-		const double kProfileKp;
-		const double kProfileKi;
-		const double kProfileKv;
-		const double kProfileKffv;
-		const double kProfileKffa;
-		const double kProfileMaxVel;
-		const double kProfileMaxAcc;
-		const double kGoalPosTolerance;
-		const double kGoalVelTolerance;
-		const double kStopSteeringDistance;
 		Parameters(Lookahead lookahead, double inertiaGain, double profileKp, double profileKi,
 				double profileKv, double profileKffv, double profileKffa, double profileMaxVel,
 				double profileMaxAcc, double goalPosTolerance, double goalVelTolerance,
 				double stopSteeringDistance);
+		Lookahead lookahead() const;
+		double inertiaGain() const;
+		double profileKp() const;
+		double profileKi() const;
+		double profileKv() const;
+		double profileKffv() const;
+		double profileKffa() const;
+		double profileMaxVel() const;
+		double profileMaxAcc() const;
+		double goalPosTolerance() const;
+		double goalVelTolerance() const;
+		double stopSteeringDistance() const;
+	private:
+		Lookahead mLookahead;
+		double mInertiaGain;
+		double mProfileKp;
+		double mProfileKi;
+		double mProfileKv;
+		double mProfileKffv;
+		double mProfileKffa;
+		double mProfileMaxVel;
+		double mProfileMaxAcc;
+		double mGoalPosTolerance;
+		double mGoalVelTolerance;
+		double mStopSteeringDistance;
 	};
 	/**
 	 * Create a new PathFollower for a given path.
@@ -79,7 +90,7 @@ public:
 	DebugOutput debug() const;
 	bool isFinished() const;
 	void forceFinish();
-	bool hasPassedMarker(std::string marker) const;
+	bool hasPassedMarker(unsigned long marker) const;
 protected:
 	AdaptivePurePursuitController mSteeringController;
 	Twist2d mLastSteeringDelta;
@@ -89,14 +100,14 @@ protected:
 	DebugOutput mDebugOutput;
 	double mProfileMaxVel;
 	double mProfileMaxAcc;
-	const double kGoalPosTolerance;
-	const double kGoalVelTolerance;
-	const double kInertiaGain;
-	const double kStopSteeringDistance;
 	double mCrossTrackError = 0.0;
 	double mAlongTrackError = 0.0;
 private:
 	static constexpr double kReallyBigNumber = 1E6;
+	double mGoalPosTolerance;
+	double mGoalVelTolerance;
+	double mInertiaGain;
+	double mStopSteeringDistance;
 };
 
 }  // namespace bns

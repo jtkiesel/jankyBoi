@@ -31,9 +31,8 @@ public:
 	public:
 		MotionState motionState;
 		bool finalSetpoint;
-		Setpoint() : Setpoint(MotionState::kInvalidState, false) {};
-		Setpoint(MotionState motionState, bool finalSetpoint) : motionState(motionState),
-				finalSetpoint(finalSetpoint) {}
+		Setpoint();
+		Setpoint(MotionState motionState, bool finalSetpoint);
 	};
 	SetpointGenerator();
 	/**

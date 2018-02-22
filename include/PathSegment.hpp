@@ -5,8 +5,6 @@
 #include "MotionState.hpp"
 #include "Translation2d.hpp"
 
-#include <string>
-
 namespace bns {
 
 /**
@@ -27,7 +25,7 @@ public:
 	PathSegment(double x1, double y1, double x2, double y2, double maxSpeed, MotionState startState,
 			double endSpeed);
 	PathSegment(double x1, double y1, double x2, double y2, double maxSpeed, MotionState startState,
-			double endSpeed, std::string marker);
+			double endSpeed, unsigned long marker);
 	/**
 	 * Constructor for an arc segment.
 	 *
@@ -42,7 +40,7 @@ public:
 	PathSegment(double x1, double y1, double x2, double y2, double cx, double cy, double maxSpeed,
 			MotionState startState, double endSpeed);
 	PathSegment(double x1, double y1, double x2, double y2, double cx, double cy, double maxSpeed,
-			MotionState startState, double endSpeed, std::string marker);
+			MotionState startState, double endSpeed, unsigned long marker);
 	/**
 	 * @return Max speed of the segment.
 	 */
@@ -91,7 +89,7 @@ public:
 	double speedByClosestPoint(Translation2d robotPosition) const;
 	MotionState startState() const;
 	MotionState endState() const;
-	std::string marker() const;
+	unsigned long marker() const;
 private:
 	Translation2d mStart;
 	Translation2d mEnd;
@@ -102,9 +100,9 @@ private:
 	bool mIsLine;
 	MotionProfile mSpeedController;
 	bool mExtrapolateLookahead;
-	std::string mMarker;
+	unsigned long mMarker;
 	PathSegment(double x1, double y1, double x2, double y2, double cx, double cy, double maxSpeed,
-			MotionState startState, double endSpeed, bool isLine, std::string marker);
+			MotionState startState, double endSpeed, bool isLine, unsigned long marker);
 	double distanceTraveled(Translation2d robotPosition) const;
 };
 

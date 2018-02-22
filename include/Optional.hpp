@@ -31,7 +31,7 @@ public:
 	 * @return     An empty <code>Optional</code>.
 	 */
 	static Optional<T> empty() {
-		return (Optional<T>)kEmpty;
+		return Optional();
 	}
 	Optional(const Optional<T> &other) : Optional(other.get()) {}
 	/**
@@ -75,10 +75,6 @@ public:
 		return isPresent() ? value : other;
 	}
 private:
-	/**
-	 * Common instance for <code>empty()</code>.
-	 */
-	static const Optional kEmpty;
 	/**
 	 * A pointer to the value.
 	 */

@@ -17,10 +17,7 @@ MotionProfileGenerator::MotionProfileGenerator() {}
 MotionProfile MotionProfileGenerator::generateFlippedProfile(MotionProfileConstraints constraints,
 		MotionProfileGoal goalState, MotionState prevState) {
 	MotionProfile profile = generateProfile(constraints, goalState.flipped(), prevState.flipped());
-	for (MotionSegment s : profile.segments()) {
-		s.setStart(s.start().flipped());
-		s.setEnd(s.end().flipped());
-	}
+	profile.flipSegments();
 	return profile;
 }
 

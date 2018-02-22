@@ -7,30 +7,28 @@
 #include "MotionProfileGoal.hpp"
 #include "MotionState.hpp"
 
-#include <string>
-
 namespace bns {
 
 PathSegment::PathSegment() {}
 
 PathSegment::PathSegment(double x1, double y1, double x2, double y2, double maxSpeed,
 		MotionState startState, double endSpeed) :
-		PathSegment(x1, y1, x2, y2, 0.0, 0.0, maxSpeed, startState, endSpeed, false, "") {}
+		PathSegment(x1, y1, x2, y2, 0.0, 0.0, maxSpeed, startState, endSpeed, false, 0) {}
 
 PathSegment::PathSegment(double x1, double y1, double x2, double y2, double maxSpeed,
-		MotionState startState, double endSpeed, std::string marker) :
+		MotionState startState, double endSpeed, unsigned long marker) :
 		PathSegment(x1, y1, x2, y2, 0.0, 0.0, maxSpeed, startState, endSpeed, false, marker) {}
 
 PathSegment::PathSegment(double x1, double y1, double x2, double y2, double cx, double cy,
 		double maxSpeed, MotionState startState, double endSpeed) :
-		PathSegment(x1, y1, x2, y2, cx, cy, maxSpeed, startState, endSpeed, false, "") {}
+		PathSegment(x1, y1, x2, y2, cx, cy, maxSpeed, startState, endSpeed, false, 0) {}
 
 PathSegment::PathSegment(double x1, double y1, double x2, double y2, double cx, double cy,
-		double maxSpeed, MotionState startState, double endSpeed, std::string marker) :
+		double maxSpeed, MotionState startState, double endSpeed, unsigned long marker) :
 		PathSegment(x1, y1, x2, y2, cx, cy, maxSpeed, startState, endSpeed, false, marker) {}
 
 PathSegment::PathSegment(double x1, double y1, double x2, double y2, double cx, double cy,
-		double maxSpeed, MotionState startState, double endSpeed, bool isLine, std::string marker) :
+		double maxSpeed, MotionState startState, double endSpeed, bool isLine, unsigned long marker) :
 		mStart(Translation2d(x1, y1)), mEnd(Translation2d(x2, y2)), mCenter(Translation2d(cx, cy)),
 		mDeltaStart(Translation2d(mCenter, mStart)), mDeltaEnd(Translation2d(mCenter, mEnd)),
 		mMaxSpeed(maxSpeed), mIsLine(isLine), mExtrapolateLookahead(false), mMarker(marker) {
@@ -142,7 +140,7 @@ MotionState PathSegment::endState() const {
 	return mSpeedController.endState();
 }
 
-std::string PathSegment::marker() const {
+unsigned long PathSegment::marker() const {
 	return mMarker;
 }
 
