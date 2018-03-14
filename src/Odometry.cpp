@@ -8,60 +8,59 @@
 
 namespace bns {
 
-Odometry::Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR,
-		double chassisWidth) : mutex(pros::mutexCreate()), encoderWheelL(encoderWheelL),
-		encoderWheelR(encoderWheelR), encoderWheelM(NULL), chassisWidth(chassisWidth) {
-	setPose(0, 0, 0);
-}
+Odometry::Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, double chassisWidth) :
+		Odometry(encoderWheelL, encoderWheelR, chassisWidth, Pose()) {}
 
-Odometry::Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR,
-		double chassisWidth, Pose pose) : mutex(pros::mutexCreate()), encoderWheelL(encoderWheelL),
-		encoderWheelR(encoderWheelR), encoderWheelM(NULL), chassisWidth(chassisWidth) {
+Odometry::Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, double chassisWidth,
+		Pose pose) : kMutex(pros::mutexCreate()), kEncoderWheelL(encoderWheelL),
+		kEncoderWheelR(encoderWheelR), kEncoderWheelM(encoderWheelL), kHasEncoderWheelM(false),
+		kChassisWidth(chassisWidth) {
 	setPose(pose);
 }
 
-Odometry::Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR,
-		EncoderWheel* const encoderWheelM, double chassisWidth) : mutex(pros::mutexCreate()),
-		encoderWheelL(encoderWheelL), encoderWheelR(encoderWheelR), encoderWheelM(encoderWheelM),
-		chassisWidth(chassisWidth) {
-	setPose(0, 0, 0);
+Odometry::Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, EncoderWheel encoderWheelM,
+		double chassisWidth) :
+		Odometry(encoderWheelL, encoderWheelR, encoderWheelM, chassisWidth, Pose()) {}
+
+Odometry::Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR,
+		EncoderWheel encoderWheelM, double chassisWidth, Pose pose) : kMutex(pros::mutexCreate()),
+		kEncoderWheelL(encoderWheelL), kEncoderWheelR(encoderWheelR), kEncoderWheelM(encoderWheelM),
+		kHasEncoderWheelM(true), kChassisWidth(chassisWidth) {
+	setPose(pose);
 }
 
-Odometry::Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR,
-		EncoderWheel* const encoderWheelM, double chassisWidth, Pose pose) : mutex(pros::mutexCreate()),
-		encoderWheelL(encoderWheelL), encoderWheelR(encoderWheelR), encoderWheelM(encoderWheelM),
-		chassisWidth(chassisWidth) {
-	setPose(pose);
+Odometry::~Odometry() {
+	pros::mutexDelete(kMutex);
 }
 
 Pose Odometry::computePose() {
-	pros::mutexTake(mutex, 20);
-	double dL = encoderWheelL->computeDistance() - lastL;
-	double dR = encoderWheelR->computeDistance() - lastR;
-	double dM = encoderWheelM->computeDistance() - lastM;
+	pros::mutexTake(kMutex, 20);
+	double dL = kEncoderWheelL.distance() - mLastL;
+	double dR = kEncoderWheelR.distance() - mLastR;
+	double dM = kHasEncoderWheelM ? (kEncoderWheelM.distance() - mLastM) : 0;
 
-	lastL += dL;
-	lastR += dR;
-	lastM += dM;
+	mLastL += dL;
+	mLastR += dR;
+	mLastM += dM;
 
 	double dS = (dR + dL) / 2;
-	double dA = (dR - dL) / chassisWidth;
+	double dA = (dR - dL) / kChassisWidth;
 	double dA_2 = dA / 2;
 
-	double dX = dS * std::sin(dA_2) + dM * std::cos(dA_2);
-	double dY = dS * std::cos(dA_2) + dM * std::sin(dA_2);
+	double dX = dS * std::sin(mPose.theta() + dA_2) + dM * std::cos(dA_2);
+	double dY = dS * std::cos(mPose.theta() + dA_2) + dM * std::sin(dA_2);
 
-	pose.add(dX, dY, dA);
+	mPose.add(dX, dY, dA);
 
-	Pose p = pose;
-	pros::mutexGive(mutex);
+	Pose p = mPose;
+	pros::mutexGive(kMutex);
 	return p;
 }
 
-Pose Odometry::getPose() const {
-	pros::mutexTake(mutex, 20);
-	Pose p = pose;
-	pros::mutexGive(mutex);
+Pose Odometry::pose() const {
+	pros::mutexTake(kMutex, 20);
+	Pose p = mPose;
+	pros::mutexGive(kMutex);
 	return p;
 }
 
@@ -70,14 +69,14 @@ void Odometry::setPose(Pose pose) {
 }
 
 void Odometry::setPose(double x, double y, double theta) {
-	pros::mutexTake(mutex, 20);
-	pose.setX(x);
-	pose.setY(y);
-	pose.setTheta(theta);
-	lastL = encoderWheelL->computeDistance();
-	lastR = encoderWheelR->computeDistance();
-	lastM = encoderWheelM->computeDistance();
-	pros::mutexGive(mutex);
+	pros::mutexTake(kMutex, 20);
+	mLastL = kEncoderWheelL.distance();
+	mLastR = kEncoderWheelR.distance();
+	mLastM = kHasEncoderWheelM ? kEncoderWheelM.distance() : 0;
+	mPose.setX(x);
+	mPose.setY(y);
+	mPose.setTheta(theta);
+	pros::mutexGive(kMutex);
 }
 
 }  // namespace bns

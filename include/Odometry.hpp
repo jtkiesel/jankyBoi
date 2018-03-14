@@ -9,24 +9,26 @@ namespace bns {
 
 class Odometry {
 public:
-	Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR, double chassisWidth);
-	Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR, double chassisWidth, Pose initialPose);
-	Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR, EncoderWheel* const encoderWheelM, double chassisWidth);
-	Odometry(EncoderWheel* const encoderWheelL, EncoderWheel* const encoderWheelR, EncoderWheel* const encoderWheelM, double chassisWidth, Pose initialPose);
+	Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, double chassisWidth);
+	Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, double chassisWidth, Pose pose);
+	Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, EncoderWheel encoderWheelM, double chassisWidth);
+	Odometry(EncoderWheel encoderWheelL, EncoderWheel encoderWheelR, EncoderWheel encoderWheelM, double chassisWidth, Pose pose);
+	~Odometry();
 	Pose computePose();
-	Pose getPose() const;
+	Pose pose() const;
 	void setPose(Pose pose);
 	void setPose(double x, double y, double theta);
 private:
-	const pros::Mutex mutex;
-	EncoderWheel* const encoderWheelL;
-	EncoderWheel* const encoderWheelR;
-	EncoderWheel* const encoderWheelM;
-	const double chassisWidth;
-	Pose pose;
-	double lastL;
-	double lastR;
-	double lastM;
+	const pros::Mutex kMutex;
+	const EncoderWheel kEncoderWheelL;
+	const EncoderWheel kEncoderWheelR;
+	const EncoderWheel kEncoderWheelM;
+	const bool kHasEncoderWheelM;
+	const double kChassisWidth;
+	Pose mPose;
+	double mLastL;
+	double mLastR;
+	double mLastM;
 };
 
 }  // namespace bns

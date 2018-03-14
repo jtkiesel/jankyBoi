@@ -1,28 +1,23 @@
 #include "EncoderWheel.hpp"
 
-#include "api.hpp"
+#include "Encoder.hpp"
 #include "util.hpp"
 
 namespace bns {
 
-EncoderWheel::EncoderWheel(pros::Encoder encoder, double countsPerRev,
-		double wheelDiameter, double gearRatio, double slipFactor,
-		bool inverted) : kEncoder(encoder), kCountsPerRev(countsPerRev),
-		kWheelDiameter(wheelDiameter), kGearRatio(gearRatio),
-		kSlipFactor(slipFactor), kInverted(inverted), mDistance(computeDistance()) {
-}
+EncoderWheel::EncoderWheel(Encoder encoder, double countsPerRev, double wheelDiameter) :
+		EncoderWheel(encoder, countsPerRev, wheelDiameter, 1) {}
 
-double EncoderWheel::computeDistance() {
-	mDistance = (counts() * kPi * kWheelDiameter) / (kCountsPerRev * kGearRatio * kSlipFactor);
-	return mDistance;
+EncoderWheel::EncoderWheel(Encoder encoder, double countsPerRev, double wheelDiameter,
+		double gearRatio) : EncoderWheel(encoder, countsPerRev, wheelDiameter, gearRatio, 1) {}
+
+EncoderWheel::EncoderWheel(Encoder encoder, double countsPerRev, double wheelDiameter,
+		double gearRatio, double slipFactor) : kEncoder(encoder), kCountsPerRev(countsPerRev),
+		kWheelDiameter(wheelDiameter), kGearRatio(gearRatio), kSlipFactor(slipFactor) {
 }
 
 double EncoderWheel::distance() const {
-	return mDistance;
-}
-
-long EncoderWheel::counts() const {
-	return (kInverted ? -1 : 1) * pros::encoderGet(kEncoder);
+	return (kEncoder.counts() * kPi * kWheelDiameter) / (kCountsPerRev * kGearRatio * kSlipFactor);
 }
 
 }  // namespace bns

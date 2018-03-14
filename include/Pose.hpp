@@ -9,6 +9,7 @@ class Pose {
 public:
 	Pose();
 	Pose(double x, double y, double theta);
+	~Pose();
 	double x() const;
 	void setX(double x);
 	double y() const;
@@ -17,8 +18,9 @@ public:
 	void setTheta(double theta);
 	void add(Pose pose);
 	void add(double x, double y, double theta);
+	Pose translationToPoint(Pose point) const;
 private:
-	const pros::Mutex mutex;
+	pros::Mutex kMutex;
 	double mX;
 	double mY;
 	double mTheta;

@@ -28,9 +28,13 @@ constexpr double kInfinity = std::numeric_limits<double>::infinity();
  */
 double signum(double d);
 
-double toDegrees(double angleRadians);
+double toDegrees(double radians);
 
-double toRadians(double angleDegrees);
+double toRadians(double degrees);
+
+double boundAngle0To2Pi(double radians);
+
+double boundAngleNegPiToPi(double radians);
 
 bool epsilonEquals(double a, double b, double epsilon);
 

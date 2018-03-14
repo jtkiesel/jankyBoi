@@ -4,26 +4,22 @@
 
 namespace bns {
 
-PidController::PidController(double Kp, double Ki, double Kd) : Kp(Kp), Ki(Ki), Kd(Kd) {
-	error = 0;
-	t = ULONG_MAX;
-	integral = 0;
-	output = 0;
-}
+PidController::PidController(double Kp, double Ki, double Kd) : kP(Kp), kI(Ki), kD(Kd), mError(0),
+		mT(ULONG_MAX), mIntegral(0), mOutput(0) {}
 
 double PidController::computeOutput(double error, unsigned long t) {
-	const double dt = (this->t == ULONG_MAX) ? 0 : (t - this->t);
-	integral += error * dt;
-	const double derivative = (dt == 0) ? 0 : ((error - this->error) / dt);
+	const double dt = (mT == ULONG_MAX) ? 0 : (t - mT);
+	mIntegral += error * dt;
+	const double derivative = (dt == 0) ? 0 : ((error - mError) / dt);
 
-	output = Kp * error + Ki * integral + Kd * derivative;
-	this->t = t;
+	mOutput = kP * error + kI * mIntegral + kD * derivative;
+	mT = t;
 
-	return output;
+	return mOutput;
 }
 
-double PidController::getOutput() const {
-	return output;
+double PidController::output() const {
+	return mOutput;
 }
 
 }  // namespace bns

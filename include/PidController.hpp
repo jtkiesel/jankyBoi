@@ -9,15 +9,15 @@ class PidController : public FeedbackController {
 public:
 	PidController(double Kp, double Ki, double Kd);
 	double computeOutput(double error, unsigned long t);
-	double getOutput() const;
+	double output() const;
 private:
-	const double Kp;
-	const double Ki;
-	const double Kd;
-	double error;
-	unsigned long t;
-	double integral;
-	double output;
+	const double kP;
+	const double kI;
+	const double kD;
+	double mError;
+	unsigned long mT;
+	double mIntegral;
+	double mOutput;
 };
 
 }  // namespace bns
