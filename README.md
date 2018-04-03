@@ -1,6 +1,6 @@
 # BNS 2018
 
-Team BNS's 2018 VEX U robot code. Written in C++ and run on PROS.
+Team BNS's 2018 VEX U robot code. Written in C and run on PROS.
 
 ## Getting Started
 
