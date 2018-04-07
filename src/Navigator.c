@@ -10,8 +10,8 @@
 #include <stdbool.h>
 
 Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveController,
-		PidController turnController, double deadReckonRadius, double driveDoneThreshold,
-		double turnDoneThreshold, unsigned long doneTime) {
+		PidController straightController, PidController turnController, double deadReckonRadius,
+		double driveDoneThreshold, double turnDoneThreshold, unsigned long doneTime) {
 	if (!drive) {
 		printf("Error - navigatorCreate: drive NULL.\n");
 		return (Navigator) {};
@@ -21,10 +21,10 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 		return (Navigator) {};
 	}
 	return (Navigator) {.drive = drive, .odometry = odometry,
-			.driveController = driveController, .turnController = turnController,
-			.deadReckonRadius = deadReckonRadius, .driveDoneThreshold = driveDoneThreshold,
-			.turnDoneThreshold = turnDoneThreshold, .doneTime = doneTime,
-			.isDeadReckoning = false, .deadReckonReference = (Pose) {},
+			.driveController = driveController, .straightController = straightController,
+			.turnController = turnController, .deadReckonRadius = deadReckonRadius,
+			.driveDoneThreshold = driveDoneThreshold, .turnDoneThreshold = turnDoneThreshold,
+			.doneTime = doneTime, .isDeadReckoning = false, .deadReckonReference = (Pose) {},
 			.deadReckonVector = (Vector) {}, .timestamp = 0};
 }
 
@@ -39,29 +39,28 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 	Vector translation = poseTranslationToPoint(pose, point);
 
 	double driveError;
-	double turnError;
+	double straightError;
 	if (translation.size > navigator->deadReckonRadius) {
 		navigator->isDeadReckoning = false;
 		driveError = translation.size;
-		turnError = translation.angle;
+		straightError = translation.angle;
 	} else {
 		if (!navigator->isDeadReckoning) {
 			navigator->isDeadReckoning = true;
 			navigator->deadReckonReference = pose;
-			navigator->deadReckonVector = (Vector) {.size = translation.size,
-					.angle = pose.theta};
+			navigator->deadReckonVector = (Vector) {.size = translation.size, .angle = pose.theta};
 		}
 		driveError = navigator->deadReckonVector.size -
 				poseDistanceToPoint(pose, navigator->deadReckonReference);
-		turnError = navigator->deadReckonVector.angle - pose.theta;
+		straightError = navigator->deadReckonVector.angle - pose.theta;
 	}
 	double drivePower = pidControllerComputeOutput(&navigator->driveController, driveError, t)
 			+ endPower;
-	double turnPower = pidControllerComputeOutput(&navigator->turnController, turnError, t)
-			* 0.045;
+	double straightPower = pidControllerComputeOutput(&navigator->straightController, straightError, t);
 
-	double leftPower = drivePower - turnPower;
-	double rightPower = drivePower + turnPower;
+	double leftPower = clampAbs(drivePower - (straightPower / 2.0), maxPower);
+	double rightPower = clampAbs(leftPower + straightPower, maxPower);
+	leftPower = clampAbs(rightPower - straightPower, maxPower);
 
 	driveSetPower(navigator->drive, leftPower, rightPower);
 
@@ -90,11 +89,12 @@ bool navigatorTurnToFacePoint(Navigator* navigator, Pose point, double maxPower,
 	Pose pose = odometryPose(navigator->odometry);
 
 	double error = poseAngleToPoint(pose, point);
-	double power = pidControllerComputeOutput(&navigator->turnController, error, t) + endPower;
+	double power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t)
+		+ endPower, maxPower);
 
 	driveSetPower(navigator->drive, -power, power);
 
-	if (error < navigator->driveDoneThreshold) {
+	if (error < navigator->turnDoneThreshold) {
 		if (endPower != 0) {
 			return true;
 		}

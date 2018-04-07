@@ -30,6 +30,10 @@ double boundAngle0To2Pi(double radians);
 
 double boundAngleNegPiToPi(double radians);
 
+double clamp(double value, double min, double max);
+
+double clampAbs(double value, double maxAbs);
+
 /**
  * Get next word from stream.
  *

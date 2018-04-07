@@ -13,6 +13,7 @@ typedef struct Navigator {
 	Drive* drive;
 	Odometry* odometry;
 	PidController driveController;
+	PidController straightController;
 	PidController turnController;
 	double deadReckonRadius;
 	double driveDoneThreshold;

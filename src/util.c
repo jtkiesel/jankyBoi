@@ -38,6 +38,15 @@ double boundAngleNegPiToPi(double radians) {
 	return radians;
 }
 
+double clamp(double value, double min, double max) {
+	double temp = (value < min) ? min : value;
+	return (temp > max) ? max : temp;
+}
+
+double clampAbs(double value, double maxAbs) {
+	return clamp(value, -maxAbs, maxAbs);
+}
+
 int fgetw(PROS_FILE *stream) {
 	int c1 = fgetc(stream);
 	int c2 = fgetc(stream);
