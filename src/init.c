@@ -67,6 +67,11 @@ void initialize() {
 	encoderDriveR = encoderInit(1, 2, false);
 	encoderDriveM = encoderInit(3, 4, false);
 
+	int line_toggle = 1200;
+	leftLine = lineSensorCreate(1, line_toggle);
+	rightLine = lineSensorCreate(2, line_toggle);
+	backLine = lineSensorCreate(3, line_toggle);
+
 	/**
 	 * Objects.
 	 */

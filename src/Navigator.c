@@ -6,6 +6,7 @@
 #include "Pose.h"
 #include "util.h"
 #include "Vector.h"
+#include "globals.h"
 
 #include <math.h>
 #include <stdbool.h>
@@ -138,6 +139,35 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 	}
 	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
 		delay(30);
+	}
+	return true;
+}
+
+bool navigateDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until)
+{
+	if (!navigator) {
+		logError("navigatorDriveToPointUntil", "navigator NULL");
+		return false;
+	}
+
+	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
+
+		if ((until & UNTIL_LEFT_LINE) != 0)
+		{
+			if (lineSensorHasLine(&leftLine)) break;
+		}
+
+		if ((until & UNTIL_RIGHT_LINE) != 0)
+		{
+			if (lineSensorHasLine(&rightLine)) break;
+		}
+
+		if ((until & UNTIL_BACK_LINE) != 0)
+		{
+			if (lineSensorHasLine(&backLine)) break;
+		}
+
+		delay(2);
 	}
 	return true;
 }
