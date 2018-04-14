@@ -43,4 +43,5 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 
 bool navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
 
+bool navigateDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until);
 #endif  // NAVIGATOR_H_
