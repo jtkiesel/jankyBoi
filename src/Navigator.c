@@ -143,7 +143,7 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 	return true;
 }
 
-bool navigateDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until)
+bool navigatorDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until)
 {
 	if (!navigator) {
 		logError("navigatorDriveToPointUntil", "navigator NULL");
@@ -154,21 +154,30 @@ bool navigateDriveToPointUntil(Navigator* navigator, Pose point, double maxPower
 
 		if ((until & UNTIL_LEFT_LINE) != 0)
 		{
-			if (lineSensorHasLine(&leftLine)) break;
+			if (lineSensorHasLine(&leftLine)) {
+				printf("Break on Left Line Sensor!!\n\n\n");
+				break;
+			}
 		}
 
 		if ((until & UNTIL_RIGHT_LINE) != 0)
 		{
-			if (lineSensorHasLine(&rightLine)) break;
+			if (lineSensorHasLine(&rightLine)) {
+				printf("Break on Right Line Sensor!!\n\n\n");
+				break;
+			}
 		}
 
 		if ((until & UNTIL_BACK_LINE) != 0)
 		{
-			if (lineSensorHasLine(&backLine)) break;
+			if (lineSensorHasLine(&backLine)) {
+				break;
+			}
 		}
 
-		delay(2);
+		delay(30);
 	}
+	driveSetPowerAll(navigator->drive, endPower);
 	return true;
 }
 

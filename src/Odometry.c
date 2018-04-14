@@ -4,6 +4,7 @@
 #include "EncoderWheel.h"
 #include "log.h"
 #include "Pose.h"
+#include "util.h"
 #include "xsens.h"
 
 #include <math.h>
@@ -59,7 +60,7 @@ Pose odometryComputePose(Odometry* odometry) {
 	odometry->lastM += dM;
 
 	double dS = (dR + dL) / 2;
-	Pose dPose = {.theta = yaw - odometry->pose.theta};  /*(dR - dL) / odometry->chassisWidth*/
+	Pose dPose = {.theta = boundAngleNegPiToPi(yaw - odometry->pose.theta)};  /*(dR - dL) / odometry->chassisWidth*/
 	double avgTheta = odometry->pose.theta + dPose.theta / 2;
 
 	dPose.x = dS * cos(avgTheta) + dM * sin(avgTheta);

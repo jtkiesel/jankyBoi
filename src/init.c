@@ -56,7 +56,7 @@ void initialize() {
 	motorRollers = motorCreate(4, false);
 	motorLift = motorCreate(5, false);
 	// Motor port 6 empty.
-	motorMogo = motorCreate(7, true);
+	motorMogo = motorCreate(7, false);
 	motorDriveR = motorCreate(8, true);
 	motorDriveR2 = motorCreate(9, true);
 
@@ -66,6 +66,11 @@ void initialize() {
 	encoderDriveL = encoderInit(5, 6, true);
 	encoderDriveR = encoderInit(1, 2, false);
 	encoderDriveM = encoderInit(3, 4, false);
+
+	print("Initializing IMEs.\n");
+	imeInitializeAll();
+	imeReset(imeMogo);
+	print("Done initializing IMEs.\n");
 
 	int line_toggle = 1200;
 	leftLine = lineSensorCreate(1, line_toggle);
@@ -79,11 +84,13 @@ void initialize() {
 	encoderWheelR = encoderWheelCreate(encoderDriveR, 360, 3.232, 5, 1);
 	encoderWheelM = encoderWheelCreate(encoderDriveM, 360, 3.232, 5, 1);
 
+	print("Calibrating Xsens.\n");
 	xsens_init(&xsens, uart1, 38400);
 	logger_set_level(&xsens.log, LOGLEVEL_ERROR);
 	logger_set_level(logger_get_global_log(), LOGLEVEL_ERROR);
 	xsens_start_task(&xsens);
 	xsens_calibrate(&xsens, 100);
+	print("Done calibrating Xsens.\n");
 
 	const Pose initialPose = poseCreate(0, 0, 0);
 	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
@@ -93,5 +100,5 @@ void initialize() {
 	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
 	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 10.0, 0.5, 0.05, 1000);
+			turnPidController, 10.0, 0.5, 0.05, 0);
 }

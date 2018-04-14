@@ -13,5 +13,5 @@ LineSensor lineSensorCreate(unsigned char port, int toggle)
 
 int lineSensorHasLine(const LineSensor* lineSensor)
 {
-  return (int)(analogRead(lineSensor->port) > lineSensor->toggle_level);
+  return (int)(analogRead(lineSensor->port) < lineSensor->toggle_level);
 }
