@@ -39,4 +39,6 @@ LineSensor leftLine;
 LineSensor rightLine;
 LineSensor backLine;
 
+PidController liftController;
+
 #endif  // CONSTANTS_H_

@@ -71,7 +71,8 @@ void mogoTask() {
 
 typedef enum LiftState {
 	LiftUp,
-	LiftDown
+	LiftDown,
+	LiftMid
 } LiftState;
 
 LiftState liftState = LiftUp;
@@ -91,19 +92,29 @@ int getLiftPosition() {
 }
 
 void liftTask() {
+
+	int liftPosition = getLiftPosition();
+	double error = 0;
+	double hold = 0;
+
 	if (liftState == LiftUp) {
-		if (getLiftPosition() < 1000) {
-			motorSetPower(&motorLift, 1.0);
-		} else {
-			motorSetPower(&motorLift, 0.05);
-		}
-	} else {
-		if (getLiftPosition() > 100) {
-			motorSetPower(&motorLift, -1.0);
-		} else {
-			motorSetPower(&motorLift, -0.05);
-		}
+		error = 1000 - liftPosition;
+		if (abs(error) < 100) hold = 0.05;
+	} else if (liftState == LiftMid){
+		error = 1500 - liftPosition;
+		if (abs(error) < 100) hold = 0.05;
 	}
+	else {
+		error = 2000 - liftPosition;
+		if (abs(error) < 100) hold = -0.05;
+	}
+
+	double pid_output = pidControllerComputeOutput(&liftController, error, 1);
+
+	if (hold != 0)
+		motorSetPower(&motorLift, hold);
+	else
+	  motorSetPower(&motorLift, pid_output);
 }
 
 /*

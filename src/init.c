@@ -94,4 +94,6 @@ void initialize() {
 	const PidController turnPidController = pidControllerCreate(1.5, 0.0, 0.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
 			turnPidController, 10.0, 0.5, 0.05, 0);
+
+	liftController = pidControllerCreate(1.0, 0.0, 0.0);
 }
