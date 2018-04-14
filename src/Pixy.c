@@ -1,6 +1,7 @@
 #include "Pixy.h"
 
 #include "API.h"
+#include "log.h"
 #include "util.h"
 
 #include <stdbool.h>
@@ -30,7 +31,7 @@ const unsigned short kPixyRcsMidPos = 500;
  */
 static bool pixyGetStart(Pixy *pixy) {
 	if (!pixy) {
-		printf("Error - pixyGetStart: pixy NULL.\n");
+		logError("pixyGetStart", "pixy NULL");
 		return false;
 	}
 	int lastW = 0xffff;  // Some inconsequential initial value.
@@ -55,7 +56,7 @@ static bool pixyGetStart(Pixy *pixy) {
 
 Pixy pixyCreate(PROS_FILE *port) {
 	if (!port) {
-		printf("Error - pixyCreate: port NULL.\n");
+		logError("pixyCreate", "port NULL");
 		return (Pixy) {};
 	}
 	return (Pixy) {.port = port, .blockCount = 0, .skipStart = false,
@@ -64,7 +65,7 @@ Pixy pixyCreate(PROS_FILE *port) {
 
 unsigned short pixyCaptureBlocks(Pixy *pixy) {
 	if (!pixy) {
-		printf("Error - pixyCaptureBlocks: pixy NULL.");
+		logError("pixyCaptureBlocks", "pixy NULL");
 		return 0;
 	}
 	unsigned short blockCount = 0;
@@ -127,7 +128,7 @@ unsigned short pixyCaptureBlocks(Pixy *pixy) {
 		if (checksum == sum) {
 			blockCount++;
 		} else {
-			printf("pixyCaptureBlocks checksum error!\n");
+			logError("pixyCaptureBlocks", "checksum error!");
 		}
 		w = fgetw(pixy->port);
 		if (w == kPixyStartNormal) {
@@ -144,7 +145,7 @@ unsigned short pixyCaptureBlocks(Pixy *pixy) {
 
 unsigned short pixyBlockCount(Pixy *pixy) {
 	if (!pixy) {
-		printf("Error - pixyBlockCount: pixy NULL.\n");
+		logError("pixyBlockCount", "pixy NULL");
 		return 0;
 	}
 	return pixy->blockCount;
@@ -152,7 +153,7 @@ unsigned short pixyBlockCount(Pixy *pixy) {
 
 size_t pixySetBrightness(Pixy *pixy, unsigned char brightness) {
 	if (!pixy) {
-		printf("Error - pixySetBrightness: pixy NULL.\n");
+		logError("pixySetBrightness", "pixy NULL");
 		return 0;
 	}
 	unsigned char outBuf[] = {0x00, 0xfe, brightness};
@@ -164,7 +165,7 @@ size_t pixySetBrightness(Pixy *pixy, unsigned char brightness) {
 
 size_t pixySetLed(Pixy *pixy, unsigned char r, unsigned char g, unsigned char b) {
 	if (!pixy) {
-		printf("Error - pixySetLed: pixy NULL.\n");
+		logError("pixySetLed", "pixy NULL");
 		return 0;
 	}
 	unsigned char outBuf[] = {0x00, 0xfd, r, g, b};
@@ -176,7 +177,7 @@ size_t pixySetLed(Pixy *pixy, unsigned char r, unsigned char g, unsigned char b)
 
 size_t pixySetServos(Pixy *pixy, unsigned short servo0, unsigned short servo1) {
 	if (!pixy) {
-		printf("Error - pixySetServos: pixy NULL.\n");
+		logError("pixySetServos", "pixy NULL");
 		return 0;
 	}
 	unsigned char servo0a = (unsigned char) (servo0 & 0xff);
@@ -192,7 +193,7 @@ size_t pixySetServos(Pixy *pixy, unsigned short servo0, unsigned short servo1) {
 
 void pixyBlockPrint(PixyBlock *pixy) {
 	if (!pixy) {
-		printf("Error - pixyBlockPrint: pixy NULL.\n");
+		logError("pixyBlockPrint", "pixy NULL");
 		return;
 	}
 	if (pixy->signature > kPixyMaxSignature) {  // Color code!
@@ -207,7 +208,7 @@ void pixyBlockPrint(PixyBlock *pixy) {
 
 void pixyPrint(Pixy *pixy) {
 	if (!pixy) {
-		printf("Error - pixyPrint: pixy NULL.\n");
+		logError("pixyPrint", "pixy NULL");
 		return;
 	}
 	printf("Detected %d:\n", pixy->blockCount);

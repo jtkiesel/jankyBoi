@@ -1,6 +1,7 @@
 #include "Pose.h"
 
 #include "API.h"
+#include "log.h"
 #include "util.h"
 #include "Vector.h"
 
@@ -12,7 +13,7 @@ Pose poseCreate(double x, double y, double theta) {
 
 void poseAdd(Pose* pose, Pose other) {
 	if (!pose) {
-		printf("Error - poseAdd: pose NULL.\n");
+		logError("poseAdd", "pose NULL");
 		return;
 	}
 	pose->x += other.x;

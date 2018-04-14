@@ -1,19 +1,20 @@
 #include "Odometry.h"
 
-#include <math.h>
-
 #include "API.h"
 #include "EncoderWheel.h"
+#include "log.h"
 #include "Pose.h"
+
+#include <math.h>
 
 Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR,
 		EncoderWheel* encoderWheelM, double chassisWidth, Pose initialPose) {
 	if (!encoderWheelL) {
-		printf("Error - odometryCreate: encoderWheelL NULL.\n");
+		logError("odometryCreate", "encoderWheelL NULL");
 		return (Odometry) {};
 	}
 	if (!encoderWheelR) {
-		printf("Error - odometryCreate: encoderWheelR NULL.\n");
+		logError("odometryCreate", "encoderWheelR NULL");
 		return (Odometry) {};
 	}
 	Odometry odometry = {.mutex = mutexCreate(), .encoderWheelL = encoderWheelL,
@@ -25,7 +26,7 @@ Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR
 
 void odometryDelete(Odometry* odometry) {
 	if (!odometry) {
-		printf("Error - odometryDelete: odometry NULL.\n");
+		logError("odometryDelete", "odometry NULL");
 		return;
 	}
 	if (odometry->mutex) {
@@ -41,14 +42,15 @@ void odometryDelete(Odometry* odometry) {
 
 Pose odometryComputePose(Odometry* odometry) {
 	if (!odometry) {
-		printf("Error - odometryComputePose: odometry NULL.\n");
+		logError("odometryComputePose", "odometry NULL");
 		return (Pose) {};
 	}
 	mutexTake(odometry->mutex, 20);
 
 	double dL = encoderWheelDistance(odometry->encoderWheelL) - odometry->lastL;
 	double dR = encoderWheelDistance(odometry->encoderWheelR) - odometry->lastR;
-	double dM = encoderWheelDistance(odometry->encoderWheelM) - odometry->lastM;
+	double dM = odometry->encoderWheelM ?
+			(encoderWheelDistance(odometry->encoderWheelM) - odometry->lastM) : 0;
 
 	odometry->lastL += dL;
 	odometry->lastR += dR;
@@ -70,7 +72,7 @@ Pose odometryComputePose(Odometry* odometry) {
 
 Pose odometryPose(const Odometry* odometry) {
 	if (!odometry) {
-		printf("Error - odometryPose: odometry NULL.\n");
+		logError("odometryPose", "odometry NULL");
 		return (Pose) {};
 	}
 	return odometry->pose;
@@ -78,7 +80,7 @@ Pose odometryPose(const Odometry* odometry) {
 
 void odometrySetPose(Odometry* odometry, Pose pose) {
 	if (!odometry) {
-		printf("Error - odometrySetPose: odometry NULL.\n");
+		logError("odometrySetPose", "odometry NULL");
 		return;
 	}
 	mutexTake(odometry->mutex, 20);

@@ -1,6 +1,7 @@
 #include "Navigator.h"
 
 #include "Drive.h"
+#include "log.h"
 #include "PidController.h"
 #include "Pose.h"
 #include "util.h"
@@ -13,11 +14,11 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 		PidController straightController, PidController turnController, double deadReckonRadius,
 		double driveDoneThreshold, double turnDoneThreshold, unsigned long doneTime) {
 	if (!drive) {
-		printf("Error - navigatorCreate: drive NULL.\n");
+		logError("navigatorCreate", "drive NULL");
 		return (Navigator) {};
 	}
 	if (!odometry) {
-		printf("Error - navigatorCreate: odometry NULL.\n");
+		logError("navigatorCreate", "odometry NULL");
 		return (Navigator) {};
 	}
 	return (Navigator) {.drive = drive, .odometry = odometry,
@@ -28,9 +29,9 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 			.deadReckonVector = (Vector) {}, .timestamp = 0};
 }
 
-bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
 	if (!navigator) {
-		printf("Error - navigatorDriveToPoint: navigator NULL.\n");
+		logError("navigatorDriveTowardsPoint", "navigator NULL");
 		return false;
 	}
 	unsigned long t = micros();
@@ -54,6 +55,13 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 				poseDistanceToPoint(pose, navigator->deadReckonReference);
 		straightError = navigator->deadReckonVector.angle - pose.theta;
 	}
+	if (maxPower < 0.0) {
+		// Drive backwards towards point.
+		driveError *= -1.0;
+		straightError += kPi;
+	}
+	straightError = boundAngleNegPiToPi(straightError);
+
 	double drivePower = pidControllerComputeOutput(&navigator->driveController, driveError, t)
 			+ endPower;
 	double straightPower = pidControllerComputeOutput(&navigator->straightController, straightError, t);
@@ -65,7 +73,7 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 	driveSetPower(navigator->drive, leftPower, rightPower);
 
 	if (driveError < navigator->driveDoneThreshold) {
-		if (endPower != 0) {
+		if (fabs(endPower) > 0.000001) {
 			return true;
 		}
 		if (navigator->timestamp == 0) {
@@ -80,22 +88,26 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 	return false;
 }
 
-bool navigatorTurnToFacePoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
 	if (!navigator) {
-		printf("Error - navigatorTurnToFacePoint: navigator NULL.\n");
+		logError("navigatorTurnTowardsPoint", "navigator NULL");
 		return false;
 	}
 	unsigned long t = micros();
 	Pose pose = odometryPose(navigator->odometry);
 
 	double error = poseAngleToPoint(pose, point);
+	if (maxPower < 0.0) {
+		// Turn backside towards point.
+		error = boundAngleNegPiToPi(error + kPi);
+	}
 	double power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t)
-		+ endPower, maxPower);
+			+ endPower, maxPower);
 
 	driveSetPower(navigator->drive, -power, power);
 
 	if (error < navigator->turnDoneThreshold) {
-		if (endPower != 0) {
+		if (fabs(endPower) > 0.000001) {
 			return true;
 		}
 		if (navigator->timestamp == 0) {
@@ -108,4 +120,26 @@ bool navigatorTurnToFacePoint(Navigator* navigator, Pose point, double maxPower,
 		navigator->timestamp = 0;
 	}
 	return false;
+}
+
+bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+	if (!navigator) {
+		logError("navigatorDriveToPoint", "navigator NULL");
+		return false;
+	}
+	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
+		delay(2);
+	}
+	return true;
+}
+
+bool navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+	if (!navigator) {
+		logError("navigatorTurnToPoint", "navigator NULL");
+		return false;
+	}
+	while (!navigatorTurnTowardsPoint(navigator, point, maxPower, endPower)) {
+		delay(2);
+	}
+	return true;
 }

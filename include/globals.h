@@ -20,6 +20,10 @@ Encoder encoderDriveL;
 Encoder encoderDriveR;
 Encoder encoderDriveM;
 
+extern const unsigned char imeRollers;
+extern const unsigned char imeLift;
+extern const unsigned char imeMogo;
+
 EncoderWheel encoderWheelL;
 EncoderWheel encoderWheelR;
 EncoderWheel encoderWheelM;

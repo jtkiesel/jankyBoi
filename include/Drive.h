@@ -6,12 +6,12 @@
 
 typedef struct Drive {
 	Motor* motorLeft;
-	Motor* motorLeft2;
 	Motor* motorRight;
+	Motor* motorLeft2;
 	Motor* motorRight2;
 } Drive;
 
-Drive driveCreate(Motor* motorLeft, Motor* motorLeft2, Motor* motorRight, Motor* motorRight2);
+Drive driveCreate(Motor* motorLeft, Motor* motorRight, Motor* motorLeft2, Motor* motorRight2);
 
 void driveSetPwm(const Drive* drive, int pwmLeft, int pwmRight);
 

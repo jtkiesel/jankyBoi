@@ -30,6 +30,80 @@ void debugTask() {
 	printf("translation: (%.3f size, %f angle)\n", translation.size, translation.angle);
 }
 
+typedef enum MogoState {
+	MogoUp,
+	MogoDown
+} MogoState;
+
+MogoState mogoState = MogoUp;
+
+void mogoUp() {
+	mogoState = MogoUp;
+}
+
+void mogoDown() {
+	mogoState = MogoDown;
+}
+
+int getMogoPosition() {
+	int value;
+	imeGet(imeMogo, &value);
+	return value;
+}
+
+void mogoTask() {
+	if (mogoState == MogoUp) {
+		if (getMogoPosition() < 1000) {
+			motorSetPower(&motorMogo, 1.0);
+		} else {
+			motorSetPower(&motorMogo, 0.05);
+		}
+	} else {
+		while (getMogoPosition() > 100) {
+			motorSetPower(&motorMogo, -1.0);
+			delay(20);
+		}
+		motorSetPower(&motorMogo, -0.05);
+	}
+}
+
+typedef enum LiftState {
+	LiftUp,
+	LiftDown
+} LiftState;
+
+LiftState liftState = LiftUp;
+
+void liftUp() {
+	liftState = LiftUp;
+}
+
+void liftDown() {
+	liftState = LiftDown;
+}
+
+int getLiftPosition() {
+	int value;
+	imeGet(imeLift, &value);
+	return value;
+}
+
+void liftTask() {
+	if (liftState == LiftUp) {
+		if (getLiftPosition() < 1000) {
+			motorSetPower(&motorLift, 1.0);
+		} else {
+			motorSetPower(&motorLift, 0.05);
+		}
+	} else {
+		if (getLiftPosition() > 100) {
+			motorSetPower(&motorLift, -1.0);
+		} else {
+			motorSetPower(&motorLift, -0.05);
+		}
+	}
+}
+
 /*
  * Runs the user operator control code. This function will be started in its own task with the
  * default priority and stack size whenever the robot is enabled via the Field Management System
@@ -55,11 +129,15 @@ void operatorControl() {
 
 	taskRunLoop(odometryTask, 2);
 	taskRunLoop(debugTask, 100);
+	taskRunLoop(mogoTask, 20);
+
+	Pose point = {.x = 40.0, .y = 40.0, .theta = 0.0};
+	navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
+	navigatorDriveToPoint(&navigator, point, 1.0, 0.0);
 
 	while (true) {
-		if (joystickGetDigital(1, 5, JOY_UP)) {
+		/*if (joystickGetDigital(1, 5, JOY_UP)) {
 			//navigatorDriveToPoint(&navigator, (Pose) {.x = 30.0, .y = 0.0, .theta = 0.0}, 1.0, 0.0);
-			navigatorTurnToFacePoint(&navigator, (Pose) {.x = 100.0, .y = 100.0, .theta = 0.0}, 1.0, 0.0);
 		} else {
 			driveL = joystickGetAnalog(1, 3);
 			driveR = joystickGetAnalog(1, 2);
@@ -71,7 +149,7 @@ void operatorControl() {
 			motorSetPwm(&motorLift, lift);
 			motorSetPwm(&motorRollers, rollers);
 			motorSetPwm(&motorMogo, mogo);
-		}
+		}*/
 
 		delay(20);
 	}

@@ -1,13 +1,14 @@
 #include "Motor.h"
 
 #include "API.h"
+#include "log.h"
 
 #include <math.h>
 #include <stdbool.h>
 
 Motor motorCreate(unsigned char port, bool reversed) {
 	if (port > 10) {
-		printf("Error - motorCreate: port > 10.");
+		logError("motorCreate", "port > 10");
 		return (Motor) {};
 	}
 	return (Motor) {.port = port, .direction = (signed char) (reversed ? -1 : 1)};
@@ -15,13 +16,17 @@ Motor motorCreate(unsigned char port, bool reversed) {
 
 void motorSetPwm(const Motor* motor, int pwm) {
 	if (!motor) {
-		printf("Error - motorSetPwm: motor NULL.\n");
+		logError("motorSetPwm", "motor NULL");
 		return;
 	}
 	motorSet(motor->port, (motor->direction * pwm));
 }
 
 void motorSetPower(const Motor* motor, double power) {
+	if (!motor) {
+		logError("motorSetPower", "motor NULL");
+		return;
+	}
 	motorSetPwm(motor, powerToPwm(power));
 }
 
