@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#ifndef GLOBALS_H_
+#define GLOBALS_H_
 
 #include "API.h"
 #include "Drive.h"
@@ -41,4 +41,53 @@ LineSensor backLine;
 
 PidController liftController;
 
-#endif  // CONSTANTS_H_
+void compControlTask();
+
+void odometryTask();
+
+void debugTask();
+
+typedef enum MogoState {
+	MogoUp,
+	MogoDown
+} MogoState;
+
+void mogoUp();
+
+void mogoDown();
+
+int getMogoPosition();
+
+void mogoTask();
+
+void waitUntilMogo();
+
+typedef enum LiftState {
+	LiftUp,
+	LiftDown,
+	LiftMid
+} LiftState;
+
+void liftUp();
+
+void liftDown();
+
+int getLiftPosition();
+
+void liftTask();
+
+int getIntakePosition();
+
+typedef enum IntakeState {
+	IntakeIn,
+	IntakeOut,
+	IntakeNone
+} IntakeState;
+
+void intakeIn();
+
+void intakeOut();
+
+void intakeTask();
+
+#endif  // GLOBALS_H_
