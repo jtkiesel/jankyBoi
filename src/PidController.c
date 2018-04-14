@@ -1,5 +1,6 @@
 #include "PidController.h"
 
+#include "API.h"
 #include "log.h"
 
 #include <limits.h>
@@ -18,6 +19,7 @@ double pidControllerComputeOutput(PidController* pidController, double error, un
 	const unsigned long dt = (pidController->t == ULONG_MAX) ? 0 : (t - pidController->t);
 	pidController->integral += error * dt;
 	const double derivative = (dt == 0) ? 0.0 : ((error - pidController->error) / dt);
+	printf("derivative: %f\n", pidController->Kd * derivative);
 
 	pidController->output = pidController->Kp * error + pidController->Ki * pidController->integral
 			+ pidController->Kd * derivative;

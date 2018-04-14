@@ -135,10 +135,11 @@ void operatorControl() {
 
 	Pose point = {.x = 20.0, .y = 20.0, .theta = 0.0};
 	navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
-	navigatorDriveToPoint(&navigator, point, 1.0, 0.0);
-	delay(1000);
-	point = (Pose) {.x = 0.0, .y = 0.0, .theta = 0.0};
-	navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
+	//navigatorDriveToPoint(&navigator, point, 1.0, -0.05);
+	/*delay(1000);
+	Pose point2 = {.x = 0.0, .y = 20.0, .theta = 0.0};
+	navigatorTurnToPoint(&navigator, point2, -1.0, 0.0);
+	navigatorDriveToPoint(&navigator, point2, -1.0, 0.05);*/
 
 	while (true) {
 		/*if (joystickGetDigital(1, 5, JOY_UP)) {

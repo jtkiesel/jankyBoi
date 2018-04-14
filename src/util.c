@@ -44,6 +44,7 @@ double clamp(double value, double min, double max) {
 }
 
 double clampAbs(double value, double maxAbs) {
+	maxAbs = fabs(maxAbs);
 	return clamp(value, -maxAbs, maxAbs);
 }
 

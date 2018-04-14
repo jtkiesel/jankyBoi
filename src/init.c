@@ -86,7 +86,7 @@ void initialize() {
 	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
 	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);
 	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
-	const PidController turnPidController = pidControllerCreate(1.5, 0.0, 0.0);
+	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 10.0, 0.5, 0.05, 0);
+			turnPidController, 10.0, 0.5, 0.05, 1000);
 }

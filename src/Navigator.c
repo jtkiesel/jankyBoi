@@ -45,6 +45,11 @@ bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPowe
 		navigator->isDeadReckoning = false;
 		driveError = translation.size;
 		straightError = translation.angle;
+		if (maxPower < 0.0) {
+			// Drive backwards towards point.
+			driveError *= -1.0;
+			straightError += kPi;
+		}
 	} else {
 		if (!navigator->isDeadReckoning) {
 			navigator->isDeadReckoning = true;
@@ -54,11 +59,10 @@ bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPowe
 		driveError = navigator->deadReckonVector.size -
 				poseDistanceToPoint(pose, navigator->deadReckonReference);
 		straightError = navigator->deadReckonVector.angle - pose.theta;
-	}
-	if (maxPower < 0.0) {
-		// Drive backwards towards point.
-		driveError *= -1.0;
-		straightError += kPi;
+		if (maxPower < 0.0) {
+			// Drive backwards towards point.
+			driveError *= -1.0;
+		}
 	}
 	straightError = boundAngleNegPiToPi(straightError);
 
@@ -72,7 +76,7 @@ bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPowe
 
 	driveSetPower(navigator->drive, leftPower, rightPower);
 
-	if (driveError < navigator->driveDoneThreshold) {
+	if (fabs(driveError) < navigator->driveDoneThreshold) {
 		if (fabs(endPower) > 0.000001) {
 			driveSetPowerAll(navigator->drive, endPower);
 			return true;
@@ -108,7 +112,7 @@ bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower
 
 	driveSetPower(navigator->drive, -power, power);
 
-	if (error < navigator->turnDoneThreshold) {
+	if (fabs(error) < navigator->turnDoneThreshold) {
 		if (fabs(endPower) > 0.000001) {
 			print("endPower != 0\n");
 			driveSetPower(navigator->drive, -endPower, endPower);
@@ -133,7 +137,7 @@ bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, do
 		return false;
 	}
 	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
-		delay(2);
+		delay(30);
 	}
 	return true;
 }
@@ -144,7 +148,7 @@ bool navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, dou
 		return false;
 	}
 	while (!navigatorTurnTowardsPoint(navigator, point, maxPower, endPower)) {
-		delay(2);
+		delay(30);
 	}
 	return true;
 }
