@@ -53,8 +53,8 @@ void initialize() {
 	 */
 	motorDriveL = motorCreate(2, false);
 	motorDriveL2 = motorCreate(3, false);
-	motorRollers = motorCreate(4, false);
-	motorLift = motorCreate(5, false);
+	motorRollers = motorCreate(5, false);
+	motorLift = motorCreate(4, false);
 	// Motor port 6 empty.
 	motorMogo = motorCreate(7, false);
 	motorDriveR = motorCreate(8, true);
@@ -70,6 +70,7 @@ void initialize() {
 	print("Initializing IMEs.\n");
 	imeInitializeAll();
 	imeReset(imeMogo);
+	imeReset(imeLift);
 	print("Done initializing IMEs.\n");
 
 	int line_toggle = 1200;
@@ -101,4 +102,6 @@ void initialize() {
 	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
 			turnPidController, 10.0, 0.5, 0.05, 0);
+
+	liftController = pidControllerCreate(0.01, 0.0, 0.03);
 }
