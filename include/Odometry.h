@@ -4,12 +4,14 @@
 #include "API.h"
 #include "EncoderWheel.h"
 #include "Pose.h"
+#include "xsens.h"
 
 typedef struct Odometry {
 	Mutex mutex;
 	EncoderWheel* encoderWheelL;
 	EncoderWheel* encoderWheelR;
 	EncoderWheel* encoderWheelM;
+	struct XsensVex* xsens;
 	double chassisWidth;
 	Pose pose;
 	double lastL;
@@ -18,7 +20,7 @@ typedef struct Odometry {
 } Odometry;
 
 Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR,
-		EncoderWheel* encoderWheelM, double chassisWidth, Pose initialPose);
+		EncoderWheel* encoderWheelM, struct XsensVex* xsens, double chassisWidth, Pose initialPose);
 
 void odometryDelete(Odometry* odometry);
 

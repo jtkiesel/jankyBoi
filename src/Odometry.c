@@ -4,11 +4,12 @@
 #include "EncoderWheel.h"
 #include "log.h"
 #include "Pose.h"
+#include "xsens.h"
 
 #include <math.h>
 
 Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR,
-		EncoderWheel* encoderWheelM, double chassisWidth, Pose initialPose) {
+		EncoderWheel* encoderWheelM, struct XsensVex* xsens, double chassisWidth, Pose initialPose) {
 	if (!encoderWheelL) {
 		logError("odometryCreate", "encoderWheelL NULL");
 		return (Odometry) {};
@@ -18,7 +19,7 @@ Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR
 		return (Odometry) {};
 	}
 	Odometry odometry = {.mutex = mutexCreate(), .encoderWheelL = encoderWheelL,
-			.encoderWheelR = encoderWheelR, .encoderWheelM = encoderWheelM,
+			.encoderWheelR = encoderWheelR, .encoderWheelM = encoderWheelM, .xsens = xsens,
 			.chassisWidth = chassisWidth};
 	odometrySetPose(&odometry, initialPose);
 	return odometry;
@@ -51,13 +52,14 @@ Pose odometryComputePose(Odometry* odometry) {
 	double dR = encoderWheelDistance(odometry->encoderWheelR) - odometry->lastR;
 	double dM = odometry->encoderWheelM ?
 			(encoderWheelDistance(odometry->encoderWheelM) - odometry->lastM) : 0;
+	double yaw = xsens_get_yaw(odometry->xsens) / 57.2958;
 
 	odometry->lastL += dL;
 	odometry->lastR += dR;
 	odometry->lastM += dM;
 
 	double dS = (dR + dL) / 2;
-	Pose dPose = {.theta = (dR - dL) / odometry->chassisWidth};
+	Pose dPose = {.theta = yaw - odometry->pose.theta};  /*(dR - dL) / odometry->chassisWidth*/
 	double avgTheta = odometry->pose.theta + dPose.theta / 2;
 
 	dPose.x = dS * cos(avgTheta) + dM * sin(avgTheta);

@@ -7,6 +7,7 @@
 #include "Motor.h"
 #include "Navigator.h"
 #include "Odometry.h"
+#include "xsens.h"
 
 Motor motorDriveL;
 Motor motorDriveL2;
@@ -27,6 +28,7 @@ extern const unsigned char imeMogo;
 EncoderWheel encoderWheelL;
 EncoderWheel encoderWheelR;
 EncoderWheel encoderWheelM;
+struct XsensVex xsens;
 Odometry odometry;
 
 Drive drive;

@@ -21,6 +21,7 @@
 #include "Odometry.h"
 #include "PidController.h"
 #include "Pose.h"
+#include "xsens.h"
 
 /*
  * Runs pre-initialization code. This function will be started in kernel mode one time while the
@@ -73,13 +74,19 @@ void initialize() {
 	encoderWheelR = encoderWheelCreate(encoderDriveR, 360, 3.232, 5, 1);
 	encoderWheelM = encoderWheelCreate(encoderDriveM, 360, 3.232, 5, 1);
 
-	const Pose initialPose = poseCreate(0, 0, 0);
-	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, 7.99011, initialPose);
+	xsens_init(&xsens, uart1, 38400);
+	logger_set_level(&xsens.log, LOGLEVEL_ERROR);
+	logger_set_level(logger_get_global_log(), LOGLEVEL_ERROR);
+	xsens_start_task(&xsens);
+	xsens_calibrate(&xsens, 100);
 
-	drive = driveCreate(&motorDriveL, &motorDriveL2, &motorDriveR, &motorDriveR2);
-	const PidController drivePidController = pidControllerCreate(0.08, 0.0, 0.0);
-	const PidController straightPidController = pidControllerCreate(1.0, 0.0, 50000.0);
-	const PidController turnPidController = pidControllerCreate(11.0, 0.0, 500000.0);
+	const Pose initialPose = poseCreate(0, 0, 0);
+	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
+
+	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
+	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);
+	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
+	const PidController turnPidController = pidControllerCreate(1.5, 0.0, 0.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 10.0, 1.0, 0.05, 250);
+			turnPidController, 10.0, 0.5, 0.05, 0);
 }
