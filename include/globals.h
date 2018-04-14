@@ -7,6 +7,7 @@
 #include "Motor.h"
 #include "Navigator.h"
 #include "Odometry.h"
+#include "LineSensor.h"
 
 Motor motorDriveL;
 Motor motorDriveL2;
@@ -31,5 +32,9 @@ Odometry odometry;
 
 Drive drive;
 Navigator navigator;
+
+LineSensor leftLine;
+LineSensor rightLine;
+LineSensor backLine;
 
 #endif  // CONSTANTS_H_
