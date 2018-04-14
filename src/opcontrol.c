@@ -98,15 +98,15 @@ void liftTask() {
 	double hold = 0;
 
 	if (liftState == LiftUp) {
-		error = 1000 - liftPosition;
-		if (abs(error) < 100) hold = 0.05;
+		error = 0 - liftPosition;
+		if (abs(error) < 20) hold = 0.05;
 	} else if (liftState == LiftMid){
-		error = 1500 - liftPosition;
-		if (abs(error) < 100) hold = 0.05;
+		error = -175 - liftPosition;
+		//if (abs(error) < 20) hold = 0.05;
 	}
 	else {
-		error = 2000 - liftPosition;
-		if (abs(error) < 100) hold = -0.05;
+		error = -950 - liftPosition;
+		if (abs(error) < 20) hold = -0.05;
 	}
 
 	double pid_output = pidControllerComputeOutput(&liftController, error, 1);
@@ -115,8 +115,63 @@ void liftTask() {
 		motorSetPower(&motorLift, hold);
 	else
 	  motorSetPower(&motorLift, pid_output);
+	//printf("lift position %d, output = %f\n", liftPosition, pid_output);
 }
 
+int getIntakePosition()
+{
+	int value;
+	imeGet(imeRollers, &value);
+	return value;
+}
+
+typedef enum IntakeState {
+	IntakeIn,
+	IntakeOut,
+	IntakeNone
+} IntakeState;
+
+IntakeState intakeState = IntakeNone;
+
+void intakeIn()
+{
+	intakeState = IntakeIn;
+}
+
+void intakeOut()
+{
+	intakeState = IntakeOut;
+}
+
+void intakeTask()
+{
+	static int lastPosition = 0;
+	static int velocity_zero_counter = 0;
+
+	int intakePosition = getIntakePosition();
+	int intakeVelocity = intakePosition - lastPosition;
+
+	if (intakeState == IntakeNone)
+	{
+		motorSetPower(&motorRollers, 0);
+	}
+	else if (intakeState == IntakeIn)
+	{
+		if (intakeVelocity < 2) velocity_zero_counter++;
+		else velocity_zero_counter = 0;
+
+		if (velocity_zero_counter > 3) motorSetPower(&motorRollers, 0.05);
+		else motorSetPower(&motorRollers, 1.0);
+	}
+	else if (intakeState == IntakeOut)
+	{
+		motorSetPower(&motorRollers, -1.0);
+	}
+
+	//printf("Intake Velocity = %d\n", intakeVelocity);
+
+	lastPosition = intakePosition;
+}
 /*
  * Runs the user operator control code. This function will be started in its own task with the
  * default priority and stack size whenever the robot is enabled via the Field Management System
@@ -140,16 +195,21 @@ void operatorControl() {
 	int rollers;
 	int mogo;
 
-	taskRunLoop(odometryTask, 2);
+	//taskRunLoop(odometryTask, 2);
 	taskRunLoop(debugTask, 100);
-	taskRunLoop(mogoTask, 20);
+	//taskRunLoop(mogoTask, 20);
 
-	Pose point = {.x = 20.0, .y = 20.0, .theta = 0.0};
-	navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
-	navigatorDriveToPoint(&navigator, point, 1.0, 0.0);
-	delay(1000);
-	point = (Pose) {.x = 0.0, .y = 0.0, .theta = 0.0};
-	navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
+	taskRunLoop(liftTask, 20);
+	taskRunLoop(intakeTask, 50);
+
+  liftState = LiftDown;
+	intakeState = IntakeIn;
+	//Pose point = {.x = 20.0, .y = 20.0, .theta = 0.0};
+	//navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
+	//navigatorDriveToPoint(&navigator, point, 1.0, 0.0);
+	//delay(1000);
+	//point = (Pose) {.x = 0.0, .y = 0.0, .theta = 0.0};
+	//navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
 
 	while (true) {
 		/*if (joystickGetDigital(1, 5, JOY_UP)) {

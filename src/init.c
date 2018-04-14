@@ -53,8 +53,8 @@ void initialize() {
 	 */
 	motorDriveL = motorCreate(2, false);
 	motorDriveL2 = motorCreate(3, false);
-	motorRollers = motorCreate(4, false);
-	motorLift = motorCreate(5, false);
+	motorRollers = motorCreate(5, false);
+	motorLift = motorCreate(4, false);
 	// Motor port 6 empty.
 	motorMogo = motorCreate(7, true);
 	motorDriveR = motorCreate(8, true);
@@ -85,6 +85,8 @@ void initialize() {
 	xsens_start_task(&xsens);
 	xsens_calibrate(&xsens, 100);
 
+	 imeInitializeAll();
+	 imeReset(imeLift);
 	const Pose initialPose = poseCreate(0, 0, 0);
 	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
 
@@ -95,5 +97,5 @@ void initialize() {
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
 			turnPidController, 10.0, 0.5, 0.05, 0);
 
-	liftController = pidControllerCreate(1.0, 0.0, 0.0);
+	liftController = pidControllerCreate(0.01, 0.0, 0.03);
 }
