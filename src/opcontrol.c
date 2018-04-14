@@ -17,6 +17,7 @@
 #include "Motor.h"
 #include "Odometry.h"
 #include "Pose.h"
+#include "xsens.h"
 
 #include <math.h>
 
@@ -26,8 +27,9 @@ void odometryTask() {
 
 void debugTask() {
 	printf("(%.3f x, %.3f y, %f theta)\n", odometry.pose.x, odometry.pose.y, odometry.pose.theta);
-	const Vector translation = poseTranslationToPoint(odometry.pose, (Pose) {.x = 30.0, .y = 0.0, .theta = 0.0});//odometryPose(&odometry);
-	printf("translation: (%.3f size, %f angle)\n", translation.size, translation.angle);
+	//printf("xsens yaw: %.3f\n", xsens_get_yaw(&xsens));
+	//const Vector translation = poseTranslationToPoint(odometry.pose, (Pose) {.x = 30.0, .y = 0.0, .theta = 0.0});//odometryPose(&odometry);
+	//printf("translation: (%.3f size, %f angle)\n", translation.size, translation.angle);
 }
 
 typedef enum MogoState {
@@ -131,9 +133,12 @@ void operatorControl() {
 	taskRunLoop(debugTask, 100);
 	taskRunLoop(mogoTask, 20);
 
-	Pose point = {.x = 40.0, .y = 40.0, .theta = 0.0};
+	Pose point = {.x = 20.0, .y = 20.0, .theta = 0.0};
 	navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
 	navigatorDriveToPoint(&navigator, point, 1.0, 0.0);
+	delay(1000);
+	point = (Pose) {.x = 0.0, .y = 0.0, .theta = 0.0};
+	navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
 
 	while (true) {
 		/*if (joystickGetDigital(1, 5, JOY_UP)) {

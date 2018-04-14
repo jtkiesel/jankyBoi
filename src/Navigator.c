@@ -74,12 +74,14 @@ bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPowe
 
 	if (driveError < navigator->driveDoneThreshold) {
 		if (fabs(endPower) > 0.000001) {
+			driveSetPowerAll(navigator->drive, endPower);
 			return true;
 		}
 		if (navigator->timestamp == 0) {
 			navigator->timestamp = millis();
-		} else if (navigator->timestamp > navigator->doneTime) {
+		} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
 			navigator->timestamp = 0;
+			driveSetPowerAll(navigator->drive, endPower);
 			return true;
 		}
 	} else {
@@ -108,12 +110,15 @@ bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower
 
 	if (error < navigator->turnDoneThreshold) {
 		if (fabs(endPower) > 0.000001) {
+			print("endPower != 0\n");
+			driveSetPower(navigator->drive, -endPower, endPower);
 			return true;
 		}
 		if (navigator->timestamp == 0) {
 			navigator->timestamp = millis();
-		} else if (navigator->timestamp > navigator->doneTime) {
+		} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
 			navigator->timestamp = 0;
+			driveSetPower(navigator->drive, -endPower, endPower);
 			return true;
 		}
 	} else {
