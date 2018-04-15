@@ -94,6 +94,7 @@ void operatorControl() {
 			// Delete Later
 			//mogoDown();
 			xsens_reset_heading(&xsens, 0, 0, 180);
+
 			// ----
 			//navigatorTurnToAngle(&navigator, 2.35, 0.8, -0.05);
 			//navigator.straightController = straight_controller;
@@ -117,6 +118,9 @@ void operatorControl() {
 			mogoDown();
 			delay(500);
 			navigatorDriveToDistance(&navigator, -12, toRadians(-135), 1.0, 0.05);
+			mogoUp();
+			navigatorTurnToPoint(&navigator, (Pose){.x = -12, .y = 80}, 0.8, 0.05);
+			navigatorDriveToPoint(&navigator, (Pose){.x = -12, .y = 80}, 0.8, 0.05);
 
 			/*navigatorTurnToAngle(&navigator, 2.6, 1.0, 0.05);
 			navigatorDriveToDistance(&navigator, 15, 2.6, 0.6, -0.05);

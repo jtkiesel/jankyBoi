@@ -93,7 +93,7 @@ void initialize() {
 	xsens_calibrate(&xsens, 100);
 	print("Done calibrating Xsens.\n");
 
-	const Pose initialPose = poseCreate(0, 0, 3.1415);
+	const Pose initialPose = poseCreate(72, 24, 0);
 	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
 
 	encoderRoller = encoderInit(11, 12, false);
