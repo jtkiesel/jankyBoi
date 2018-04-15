@@ -15,6 +15,9 @@
 #define UNTIL_BACK_LINE 0x04
 #define UNTIL_BACK_SONAR 0x08
 
+#define SMOOTH_TURN_LEFT -1
+#define SMOOTH_TURN_RIGHT 1
+
 typedef struct Navigator {
 	Drive* drive;
 	Odometry* odometry;
