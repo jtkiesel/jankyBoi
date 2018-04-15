@@ -53,8 +53,10 @@ void operatorControl() {
 	taskRunLoop(liftTask, 20);
 	taskRunLoop(intakeTask, 50);
 
-  	liftDown();
-	intakeIn();
+
+
+  	//liftDown();
+	//intakeIn();
 	//Pose point = {.x = 20.0, .y = 20.0, .theta = 0.0};
 	//navigatorTurnToPoint(&navigator, point, 1.0, 0.0);
 	//navigatorDriveToPoint(&navigator, point, 1.0, 0.0);

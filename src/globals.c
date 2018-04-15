@@ -4,14 +4,14 @@
 
 #include <math.h>
 
-const unsigned char imeRollers = 2;
-const unsigned char imeLift = 1;
-const unsigned char imeMogo = 0;
+const unsigned char imeLift = 0;
 
 void compControlTask() {
-	if (fgetc(stdin) == 'a') {
+	int c = fgetc(stdin);
+	if (c == 'a') {
 		autonomous();
 	}
+	printf("%d\n", c);
 }
 
 void odometryTask() {
@@ -26,50 +26,42 @@ void debugTask() {
 }
 
 MogoState mogoState = MogoUp;
+bool mogoDone = true;
 
 void mogoUp() {
+	mogoDone = false;
 	mogoState = MogoUp;
 }
 
 void mogoDown() {
+	mogoDone = false;
 	mogoState = MogoDown;
 }
 
-int getMogoPosition() {
-	int value;
-	imeGet(imeMogo, &value);
-	return value;
-}
-
 void mogoTask() {
-	if (mogoState == MogoUp) {
-		if (getMogoPosition() < 1000) {
+	static MogoState lastMogoState = MogoUp;
+	if (mogoState != lastMogoState) {
+		if (mogoState == MogoUp) {
 			motorSetPower(&motorMogo, 1.0);
-		} else {
+			delay(1200);
 			motorSetPower(&motorMogo, 0.05);
-		}
-	} else {
-		while (getMogoPosition() > 100) {
+		} else {
 			motorSetPower(&motorMogo, -1.0);
-			delay(20);
+			delay(1200);
+			motorSetPower(&motorMogo, -0.05);
 		}
-		motorSetPower(&motorMogo, -0.05);
+		lastMogoState = mogoState;
+		mogoDone = true;
 	}
 }
 
 void waitUntilMogo() {
-	if (mogoState == MogoUp) {
-		while (getMogoPosition() < (0 - 60)) {
-			delay(20);
-		}
-	} else {
-		while (getMogoPosition() > (-625 + 60)) {
-			delay(20);
-		}
+	while (!mogoDone) {
+		delay(20);
 	}
 }
 
-LiftState liftState = LiftUp;
+LiftState liftState = LiftDown;
 
 void liftUp() {
 	liftState = LiftUp;
@@ -77,6 +69,10 @@ void liftUp() {
 
 void liftDown() {
 	liftState = LiftDown;
+}
+
+void liftMid() {
+	liftState = LiftMid;
 }
 
 int getLiftPosition() {
@@ -91,11 +87,11 @@ void liftTask() {
 	double error = 0;
 	double hold = 0;
 
-	if (liftState == LiftUp) {
+	if (liftState == LiftDown) {
 		error = 0 - liftPosition;
 		if (abs(error) < 20) hold = 0.05;
 	} else if (liftState == LiftMid){
-		error = -175 - liftPosition;
+		error = -275 - liftPosition;
 		//if (abs(error) < 20) hold = 0.05;
 	}
 	else {
@@ -114,9 +110,9 @@ void liftTask() {
 
 int getIntakePosition()
 {
-	int value;
-	imeGet(imeRollers, &value);
-	return value;
+	//int value;
+	return encoderGet(encoderRoller);
+	//return value;
 }
 
 IntakeState intakeState = IntakeNone;
@@ -129,6 +125,11 @@ void intakeIn()
 void intakeOut()
 {
 	intakeState = IntakeOut;
+}
+
+void intakeNone()
+{
+	intakeState = IntakeNone;
 }
 
 void intakeTask()
@@ -145,10 +146,10 @@ void intakeTask()
 	}
 	else if (intakeState == IntakeIn)
 	{
-		if (intakeVelocity < 2) velocity_zero_counter++;
+		if (intakeVelocity > -2) velocity_zero_counter++;
 		else velocity_zero_counter = 0;
 
-		if (velocity_zero_counter > 3) motorSetPower(&motorRollers, 0.05);
+		if (velocity_zero_counter > 3) motorSetPower(&motorRollers, 0.1);
 		else motorSetPower(&motorRollers, 1.0);
 	}
 	else if (intakeState == IntakeOut)
@@ -156,7 +157,7 @@ void intakeTask()
 		motorSetPower(&motorRollers, -1.0);
 	}
 
-	//printf("Intake Velocity = %d\n", intakeVelocity);
+	printf("Intake Velocity = %d\n", intakeVelocity);
 
 	lastPosition = intakePosition;
 }

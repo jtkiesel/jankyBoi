@@ -22,9 +22,9 @@ Encoder encoderDriveL;
 Encoder encoderDriveR;
 Encoder encoderDriveM;
 
-extern const unsigned char imeRollers;
+Encoder encoderRoller;
+
 extern const unsigned char imeLift;
-extern const unsigned char imeMogo;
 
 EncoderWheel encoderWheelL;
 EncoderWheel encoderWheelR;
@@ -72,6 +72,8 @@ void liftUp();
 
 void liftDown();
 
+void liftMid();
+
 int getLiftPosition();
 
 void liftTask();
@@ -87,6 +89,8 @@ typedef enum IntakeState {
 void intakeIn();
 
 void intakeOut();
+
+void intakeNone();
 
 void intakeTask();
 

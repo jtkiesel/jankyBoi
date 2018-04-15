@@ -32,6 +32,7 @@
  * configure a UART port (usartOpen()) but cannot set up an LCD (lcdInit()).
  */
 void initializeIO() {
+	//watchdogInit();
 }
 
 /*
@@ -53,8 +54,8 @@ void initialize() {
 	 */
 	motorDriveL = motorCreate(2, false);
 	motorDriveL2 = motorCreate(3, false);
-	motorRollers = motorCreate(5, false);
 	motorLift = motorCreate(4, false);
+	motorRollers = motorCreate(5, false);
 	// Motor port 6 empty.
 	motorMogo = motorCreate(7, false);
 	motorDriveR = motorCreate(8, true);
@@ -67,11 +68,10 @@ void initialize() {
 	encoderDriveR = encoderInit(1, 2, false);
 	encoderDriveM = encoderInit(3, 4, false);
 
-	print("Initializing IMEs.\n");
-	imeInitializeAll();
-	imeReset(imeMogo);
-	imeReset(imeLift);
-	print("Done initializing IMEs.\n");
+	//print("Initializing IMEs.\n");
+	//imeInitializeAll();
+	//imeReset(imeLift);
+	//print("Done initializing IMEs.\n");
 
 	int line_toggle = 1200;
 	leftLine = lineSensorCreate(1, line_toggle);
@@ -96,12 +96,14 @@ void initialize() {
 	const Pose initialPose = poseCreate(0, 0, 0);
 	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
 
+	encoderRoller = encoderInit(11, 12, false);
+
 	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
 	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);
 	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
 	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 10.0, 0.5, 0.05, 0);
+			turnPidController, 0.5, 0.05, 0);
 
 	liftController = pidControllerCreate(0.01, 0.0, 0.03);
 }

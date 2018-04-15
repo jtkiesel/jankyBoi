@@ -38,7 +38,9 @@ void autonomous() {
 	taskRunLoop(debugTask, 100);
 	taskRunLoop(mogoTask, 20);
 
-	mogoDown();
+	/*mogoDown();
+	intakeIn();
+	liftMid();
 	waitUntilMogo();
 	navigatorDriveToPoint(&navigator, (Pose) {.x = 5, .y = 0, .theta = 0}, 0.5, 0.5);
 	navigatorDriveToPointUntil(&navigator, (Pose) {.x = 40, .y = 0, .theta = 0}, 0.5, 0.5, UNTIL_LEFT_LINE);
@@ -46,10 +48,14 @@ void autonomous() {
 	navigatorDriveToPoint(&navigator, (Pose) {.x = 45, .y = 0, .theta = 0}, 1.0, -0.05);
 	mogoUp();
 	delay(1500);
+	liftDown();
 	navigatorDriveToPointUntil(&navigator, (Pose) {.x = 20, .y = 0, .theta = 0}, -0.5, -0.5, UNTIL_LEFT_LINE);
 	odometrySetPose(&odometry, (Pose) {.x = 30, .y = odometry.pose.y, .theta = odometry.pose.theta});
+	intakeOut();
+	liftMid();
 	navigatorDriveToPoint(&navigator, (Pose) {.x = 12, .y = 0, .theta = 0}, -0.5, 0.1);
 	delay(250);
+	intakeNone();
 	navigatorTurnToPoint(&navigator, (Pose) {.x = 0, .y = 24, .theta = 0}, 0.8, 0.8);
 	navigatorTurnToPoint(&navigator, (Pose) {.x = -10, .y = -10, .theta = 0}, 0.8, 0);
 	unsigned long timestamp = millis();
@@ -61,8 +67,8 @@ void autonomous() {
 	mogoDown();
 	delay(500);
 	navigatorDriveToPoint(&navigator, (Pose) {.x = 68, .y = 31, .theta = 0}, -0.5, 0.05);
-	navigatorTurnToPoint(&navigator, (Pose) {.x = 30, .y = 30, .theta = 0}, 0.8, -0.1);
-	navigatorDriveToPoint(&navigator, (Pose) {.x = 30, .y = 30, .theta = 0}, 0.5, -0.05);
+	navigatorTurnToPoint(&navigator, (Pose) {.x = 50, .y = 30, .theta = 0}, 0.8, -0.1);
+	navigatorDriveToPoint(&navigator, (Pose) {.x = 50, .y = 30, .theta = 0}, 0.5, -0.05);
 	mogoUp();
-	delay(1500);
+	delay(1500);*/
 }

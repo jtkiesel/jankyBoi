@@ -12,8 +12,8 @@
 #include <stdbool.h>
 
 Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveController,
-		PidController straightController, PidController turnController, double deadReckonRadius,
-		double driveDoneThreshold, double turnDoneThreshold, unsigned long doneTime) {
+		PidController straightController, PidController turnController, double driveDoneThreshold,
+		double turnDoneThreshold, unsigned long doneTime) {
 	if (!drive) {
 		logError("navigatorCreate", "drive NULL");
 		return (Navigator) {};
@@ -24,170 +24,82 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 	}
 	return (Navigator) {.drive = drive, .odometry = odometry,
 			.driveController = driveController, .straightController = straightController,
-			.turnController = turnController, .deadReckonRadius = deadReckonRadius,
-			.driveDoneThreshold = driveDoneThreshold, .turnDoneThreshold = turnDoneThreshold,
-			.doneTime = doneTime, .isDeadReckoning = false, .deadReckonReference = (Pose) {},
-			.deadReckonVector = (Vector) {}, .timestamp = 0};
+			.turnController = turnController, .driveDoneThreshold = driveDoneThreshold,
+			.turnDoneThreshold = turnDoneThreshold, .doneTime = doneTime, .timestamp = 0};
 }
 
-bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
-	if (!navigator) {
-		logError("navigatorDriveTowardsPoint", "navigator NULL");
-		return false;
-	}
+void navigatorDriveAtAngle(Navigator* navigator, double angle, double power) {
 	unsigned long t = micros();
+	double angleError = boundAngleNegPiToPi(angle - navigator->odometry->pose.theta);
 
-	Pose pose = odometryPose(navigator->odometry);
-	Vector translation = poseTranslationToPoint(pose, point);
+	double anglePower = pidControllerComputeOutput(&navigator->straightController, angleError, t);
 
-	double driveError;
-	double straightError;
-	if (translation.size > navigator->deadReckonRadius) {
-		navigator->isDeadReckoning = false;
-		driveError = translation.size;
-		straightError = translation.angle;
-		if (maxPower < 0.0) {
-			// Drive backwards towards point.
-			driveError *= -1.0;
-			straightError += kPi;
-		}
-	} else {
-		if (!navigator->isDeadReckoning) {
-			navigator->isDeadReckoning = true;
-			navigator->deadReckonReference = pose;
-			navigator->deadReckonVector = (Vector) {.size = translation.size, .angle = pose.theta};
-		}
-		driveError = navigator->deadReckonVector.size -
-				poseDistanceToPoint(pose, navigator->deadReckonReference);
-		straightError = navigator->deadReckonVector.angle - pose.theta;
-		if (maxPower < 0.0) {
-			// Drive backwards towards point.
-			driveError *= -1.0;
-		}
-	}
-	straightError = boundAngleNegPiToPi(straightError);
+	double powerLeft = clampAbs(power - (anglePower / 2.0), 1.0);
+	double powerRight = clampAbs(powerLeft + anglePower, 1.0);
+	powerLeft = clampAbs(powerRight - anglePower, 1.0);
 
-	double drivePower = pidControllerComputeOutput(&navigator->driveController, driveError, t)
-			+ endPower;
-	double straightPower = pidControllerComputeOutput(&navigator->straightController, straightError, t);
+	driveSetPower(navigator->drive, powerLeft, powerRight);
+}
 
-	double leftPower = clampAbs(drivePower - (straightPower / 2.0), maxPower);
-	double rightPower = clampAbs(leftPower + straightPower, maxPower);
-	leftPower = clampAbs(rightPower - straightPower, maxPower);
+void navigatorDriveToDistance(Navigator* navigator, double distance, double angle, double maxPower, double endPower) {
+	const double target = (encoderWheelDistance(navigator->odometry->encoderWheelL)
+			+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0 + distance;
+	unsigned long t;
+	double error;
+	double power;
 
-	driveSetPower(navigator->drive, leftPower, rightPower);
+	while (true) {
+		t = micros();
+		error = target - (encoderWheelDistance(navigator->odometry->encoderWheelL)
+				+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0;
 
-	if (fabs(driveError) < navigator->driveDoneThreshold) {
-		if (fabs(endPower) > 0.000001) {
-			driveSetPowerAll(navigator->drive, endPower);
-			return true;
-		}
-		if (navigator->timestamp == 0) {
-			navigator->timestamp = millis();
-		} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+		if (fabs(error) > navigator->driveDoneThreshold) {
 			navigator->timestamp = 0;
-			driveSetPowerAll(navigator->drive, endPower);
-			return true;
+			power = clampAbs(pidControllerComputeOutput(&navigator->driveController, error, t), maxPower);
+			navigatorDriveAtAngle(navigator, angle, power);
+		} else {
+			if (fabs(endPower) > 0.000001) {
+				driveSetPowerAll(navigator->drive, endPower);
+				return;
+			}
+			if (navigator->timestamp == 0) {
+				navigator->timestamp = millis();
+			} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+				navigator->timestamp = 0;
+				driveSetPowerAll(navigator->drive, endPower);
+				return;
+			}
 		}
-	} else {
-		navigator->timestamp = 0;
+		delay(10);
 	}
-	return false;
 }
 
-bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
-	if (!navigator) {
-		logError("navigatorTurnTowardsPoint", "navigator NULL");
-		return false;
-	}
-	unsigned long t = micros();
-	Pose pose = odometryPose(navigator->odometry);
+void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower) {
+	unsigned long t;
+	double error;
+	double power;
 
-	double error = poseAngleToPoint(pose, point);
-	if (maxPower < 0.0) {
-		// Turn backside towards point.
-		error = boundAngleNegPiToPi(error + kPi);
-	}
-	double power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t)
-			+ endPower, maxPower);
+	while (true) {
+		t = micros();
+		error = boundAngle0To2Pi(angle - navigator->odometry->pose.theta);
 
-	driveSetPower(navigator->drive, -power, power);
-
-	if (fabs(error) < navigator->turnDoneThreshold) {
-		if (fabs(endPower) > 0.000001) {
-			print("endPower != 0\n");
-			driveSetPower(navigator->drive, -endPower, endPower);
-			return true;
-		}
-		if (navigator->timestamp == 0) {
-			navigator->timestamp = millis();
-		} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+		if (fabs(error) > navigator->turnDoneThreshold) {
 			navigator->timestamp = 0;
-			driveSetPower(navigator->drive, -endPower, endPower);
-			return true;
-		}
-	} else {
-		navigator->timestamp = 0;
-	}
-	return false;
-}
-
-bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
-	if (!navigator) {
-		logError("navigatorDriveToPoint", "navigator NULL");
-		return false;
-	}
-	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
-		delay(30);
-	}
-	return true;
-}
-
-bool navigatorDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until)
-{
-	if (!navigator) {
-		logError("navigatorDriveToPointUntil", "navigator NULL");
-		return false;
-	}
-
-	while (!navigatorDriveTowardsPoint(navigator, point, maxPower, endPower)) {
-
-		if ((until & UNTIL_LEFT_LINE) != 0)
-		{
-			if (lineSensorHasLine(&leftLine)) {
-				printf("Break on Left Line Sensor!!\n\n\n");
-				break;
+			power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t), maxPower);
+			driveSetPower(navigator->drive, -power, power);
+		} else {
+			if (fabs(endPower) > 0.000001) {
+				driveSetPower(navigator->drive, -endPower, endPower);
+				return;
+			}
+			if (navigator->timestamp == 0) {
+				navigator->timestamp = millis();
+			} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+				navigator->timestamp = 0;
+				driveSetPower(navigator->drive, -endPower, endPower);
+				return;
 			}
 		}
-
-		if ((until & UNTIL_RIGHT_LINE) != 0)
-		{
-			if (lineSensorHasLine(&rightLine)) {
-				printf("Break on Right Line Sensor!!\n\n\n");
-				break;
-			}
-		}
-
-		if ((until & UNTIL_BACK_LINE) != 0)
-		{
-			if (lineSensorHasLine(&backLine)) {
-				break;
-			}
-		}
-
-		delay(30);
+		delay(10);
 	}
-	driveSetPowerAll(navigator->drive, endPower);
-	return true;
-}
-
-bool navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
-	if (!navigator) {
-		logError("navigatorTurnToPoint", "navigator NULL");
-		return false;
-	}
-	while (!navigatorTurnTowardsPoint(navigator, point, maxPower, endPower)) {
-		delay(30);
-	}
-	return true;
 }
