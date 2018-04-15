@@ -92,7 +92,7 @@ void navigatorSmoothTurnToAngle(Navigator* navigator, double dir, double angle, 
 			if (dir < 0)
 				driveSetPower(navigator->drive, deadPower, power);
 			// Right
-			else:
+			else
 				driveSetPower(navigator->drive, power, deadPower);
 		} else {
 			if (fabs(endPower) > 0.000001) {
