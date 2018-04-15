@@ -17,13 +17,16 @@ double pidControllerComputeOutput(PidController* pidController, double error, un
 		return NAN;
 	}
 	const unsigned long dt = (pidController->t == ULONG_MAX) ? 0 : (t - pidController->t);
+
 	pidController->integral += error * dt;
-	const double derivative = (dt == 0) ? 0.0 : ((error - pidController->error) / dt);
+	const double derivative = (dt == 0) ? 0.0 : ((error - pidController->error) * 1000000.0 / dt);
 
 	pidController->output = pidController->Kp * error + pidController->Ki * pidController->integral
 			+ pidController->Kd * derivative;
 	pidController->t = t;
 	pidController->error = error;
+
+	printf("Derivative = %f\n", (pidController->Kd * derivative));
 
 	return pidController->output;
 }

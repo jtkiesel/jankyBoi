@@ -92,7 +92,9 @@ void odometrySetPose(Odometry* odometry, Pose pose) {
 	odometry->lastR = encoderWheelDistance(odometry->encoderWheelR);
 	odometry->lastM = encoderWheelDistance(odometry->encoderWheelM);
 
-	odometry->pose = pose;
+	odometry->pose.x = pose.x;
+	odometry->pose.y = pose.y;
+	odometry->pose.theta = pose.theta;
 
 	mutexGive(odometry->mutex);
 }
