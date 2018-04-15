@@ -31,17 +31,19 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 		PidController straightController, PidController turnController, double driveDoneThreshold,
 		double turnDoneThreshold, unsigned long doneTime);
 
-bool navigatorDriveTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
+void navigatorDriveAtAngle(Navigator* navigator, double angle, double power);
 
 bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
 void navigatorDriveToDistance(Navigator* navigator, double distance, double angle, double maxPower, double endPower);
 void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower) ;
 void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double angle, double maxPower, double endPower, int until);
 
-bool navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
+void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower);
 
-bool navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
+void navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
 
-bool navigatorDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until);
+void navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
+
+void navigatorDriveToPointUntil(Navigator* navigator, Pose point, double maxPower, double endPower, int until);
 
 #endif  // NAVIGATOR_H_

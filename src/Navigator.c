@@ -83,8 +83,12 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 
 	while (true) {
 		t = micros();
+<<<<<<< HEAD
 		error = target - (encoderWheelDistance(navigator->odometry->encoderWheelL)
 				+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0;
+=======
+		error = boundAngleNegPiToPi(angle - navigator->odometry->pose.theta);
+>>>>>>> c2951b015189ae8ef6c4de18c25a3c8824e0e7bd
 
 		if (fabs(error) > navigator->driveDoneThreshold) {
 			navigator->timestamp = 0;
@@ -151,4 +155,26 @@ void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, d
 		}
 		delay(30);
 	}
+}
+
+void navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+	double dx = point.x - navigator->odometry->pose.x;
+	double dy = point.y - navigator->odometry->pose.y;
+	double distance = hypot(dy, dx);
+	double angle = atan2(dy, dx);
+	if (maxPower < 0.0) {
+		distance *= -1.0;
+		angle += kPi;
+	}
+	navigatorDriveToDistance(navigator, distance, angle, maxPower, endPower);
+}
+
+void navigatorTurnToPoint(Navigator* navigator, Pose point, double maxPower, double endPower) {
+	double dx = point.x - navigator->odometry->pose.x;
+	double dy = point.y - navigator->odometry->pose.y;
+	double angle = atan2(dy, dx);
+	if (maxPower < 0.0) {
+		angle += kPi;
+	}
+	navigatorTurnToAngle(navigator, angle, maxPower, endPower);
 }
