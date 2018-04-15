@@ -74,6 +74,43 @@ void navigatorDriveToDistance(Navigator* navigator, double distance, double angl
 	}
 }
 
+void navigatorSmoothTurnToAngle(Navigator* navigator, double dir, double angle, double maxPower, double deadPower, double endPower)
+{
+	unsigned long t;
+	double error;
+	double power;
+
+	while (true) {
+		t = micros();
+		error = boundAngleNegPiToPi(angle - navigator->odometry->pose.theta);
+
+		if (fabs(error) > navigator->turnDoneThreshold) {
+			navigator->timestamp = 0;
+			power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t), maxPower);
+
+			// Left
+			if (dir < 0)
+				driveSetPower(navigator->drive, deadPower, power);
+			// Right
+			else
+				driveSetPower(navigator->drive, power, deadPower);
+		} else {
+			if (fabs(endPower) > 0.000001) {
+				driveSetPower(navigator->drive, -endPower, endPower);
+				return;
+			}
+			if (navigator->timestamp == 0) {
+				navigator->timestamp = millis();
+			} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+				navigator->timestamp = 0;
+				driveSetPower(navigator->drive, -endPower, endPower);
+				return;
+			}
+		}
+		delay(10);
+	}
+}
+
 void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double angle, double maxPower, double endPower, int until) {
 	const double target = (encoderWheelDistance(navigator->odometry->encoderWheelL)
 			+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0 + distance;
@@ -149,7 +186,7 @@ void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, d
 				return;
 			}
 		}
-		delay(30);
+		delay(10);
 	}
 }
 
