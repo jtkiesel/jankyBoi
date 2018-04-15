@@ -74,6 +74,55 @@ void navigatorDriveToDistance(Navigator* navigator, double distance, double angl
 	}
 }
 
+void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double angle, double maxPower, double endPower, int until) {
+	const double target = (encoderWheelDistance(navigator->odometry->encoderWheelL)
+			+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0 + distance;
+	unsigned long t;
+	double error;
+	double power;
+
+	while (true) {
+		t = micros();
+		error = target - (encoderWheelDistance(navigator->odometry->encoderWheelL)
+				+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0;
+
+		if (fabs(error) > navigator->driveDoneThreshold) {
+			navigator->timestamp = 0;
+			power = clampAbs(pidControllerComputeOutput(&navigator->driveController, error, t), maxPower);
+			navigatorDriveAtAngle(navigator, angle, power);
+
+			if ((until & UNTIL_LEFT_LINE) != 0)
+			{
+				if (lineSensorHasLine(&leftLine)) break;
+			}
+
+			if ((until & UNTIL_RIGHT_LINE) != 0)
+			{
+				if (lineSensorHasLine(&rightLine)) break;
+			}
+
+			if ((until & UNTIL_BACK_LINE) != 0)
+			{
+				if (lineSensorHasLine(&backLine)) break;
+			}
+
+		} else {
+			if (fabs(endPower) > 0.000001) {
+				driveSetPowerAll(navigator->drive, endPower);
+				return;
+			}
+			if (navigator->timestamp == 0) {
+				navigator->timestamp = millis();
+			} else if ((millis() - navigator->timestamp) > navigator->doneTime) {
+				navigator->timestamp = 0;
+				driveSetPowerAll(navigator->drive, endPower);
+				return;
+			}
+		}
+		delay(10);
+	}
+}
+
 void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower) {
 	unsigned long t;
 	double error;
@@ -81,8 +130,8 @@ void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, d
 
 	while (true) {
 		t = micros();
-		error = boundAngle0To2Pi(angle - navigator->odometry->pose.theta);
-
+		error = boundAngleNegPiToPi(angle - navigator->odometry->pose.theta);
+		
 		if (fabs(error) > navigator->turnDoneThreshold) {
 			navigator->timestamp = 0;
 			power = clampAbs(pidControllerComputeOutput(&navigator->turnController, error, t), maxPower);
@@ -100,6 +149,6 @@ void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, d
 				return;
 			}
 		}
-		delay(10);
+		delay(30);
 	}
 }
