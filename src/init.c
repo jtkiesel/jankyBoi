@@ -98,6 +98,7 @@ void initialize() {
 
 	//encoderRoller = encoderInit(11, 12, false);
 	front_left_sonar = ultrasonicInit(11, 12);
+	front_right_sonar = ultrasonicInit(8, 7);
 
 	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
 	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);

@@ -40,6 +40,7 @@ LineSensor rightLine;
 LineSensor backLine;
 
 Ultrasonic front_left_sonar;
+Ultrasonic front_right_sonar;
 
 PidController liftController;
 

@@ -156,6 +156,19 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				if (good_count > 1) break;
 			}
 
+			if ((until & UNTIL_FRONT_RIGHT_SONAR) != 0)
+			{
+				int val = ultrasonicGet(front_right_sonar);
+				static good_count_r = 0;
+				printf("val = %d \n", val);
+
+				if (val > 0 && val < navigator->until_target)
+					good_count_r++;
+				else good_count_r = 0;
+
+				if (good_count_r > 1) break;
+			}
+
 		} else {
 			if (fabs(endPower) > 0.000001) {
 				driveSetPowerAll(navigator->drive, endPower);
