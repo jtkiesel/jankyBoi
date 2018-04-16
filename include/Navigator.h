@@ -14,6 +14,8 @@
 #define UNTIL_RIGHT_LINE 0x02
 #define UNTIL_BACK_LINE 0x04
 #define UNTIL_BACK_SONAR 0x08
+#define UNTIL_FRONT_LEFT_SONAR 0x10
+
 
 #define SMOOTH_TURN_LEFT -1
 #define SMOOTH_TURN_RIGHT 1
@@ -28,6 +30,8 @@ typedef struct Navigator {
 	double turnDoneThreshold;
 	unsigned long doneTime;
 	unsigned long timestamp;
+
+	double until_target;
 } Navigator;
 
 Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveController,
@@ -40,7 +44,7 @@ bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower
 void navigatorDriveToDistance(Navigator* navigator, double distance, double angle, double maxPower, double endPower);
 void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower) ;
 void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double angle, double maxPower, double endPower, int until);
-
+void navigatorSmoothTurnToAngle(Navigator* navigator, double dir, double angle, double maxPower, double deadPower, double endPower);
 void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower);
 
 void navigatorDriveToPoint(Navigator* navigator, Pose point, double maxPower, double endPower);

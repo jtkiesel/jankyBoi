@@ -66,79 +66,139 @@ void operatorControl() {
 	//navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
 
 	while (true) {
+
 		if (joystickGetDigital(1, 7, JOY_UP))
 		{
-			PidController straight_controller = pidControllerCreate(4, 0, 0);
+			PidController straight_controller = pidControllerCreate(2, 0, 0);
 			PidController naive_turn_controller = pidControllerCreate(1.5, 0, 0);
-			PidController short_turn_controller = pidControllerCreate(2.2, 0, 0.07);
-			PidController normal_turn_controller = pidControllerCreate(1.7, 0, 0.12);
-			PidController normal_mogo_turn_controller = pidControllerCreate(1.7, 0, 0.15);
+			PidController short_turn_controller = pidControllerCreate(2.4, 0, 0.05);
+			PidController normal_turn_controller = pidControllerCreate(1.8, 0, 0.11);
+			PidController normal_mogo_turn_controller = pidControllerCreate(1.9, 0, 0.12);
+
+			navigator.straightController = straight_controller;
+			navigator.turnController = normal_turn_controller;
+
+/*			xsens_reset_heading(&xsens, 0, 0, 0);
 
 			// FIRST MOGO
-			/*mogoDown();
-			navigatorDriveToDistance(&navigator, 5, 0, 0.8, 0.8);
-			navigatorDriveToDistanceUntil(&navigator, 40, 0, 0.8, 0.8, UNTIL_LEFT_LINE);
-			navigatorDriveToDistance(&navigator, 25, 0, 0.8, -0.05);
-			mogoUp();
-			delay(1500);
-			navigatorDriveToDistanceUntil(&navigator, -40, 0, 0.8, 0.8, UNTIL_LEFT_LINE);
-			navigatorDriveToDistance(&navigator, -20, -0.8, 0.6, 0.05);
-			navigatorTurnToAngle(&navigator, -2.44, 0.8, 0.05);
-			mogoDown();
-			navigatorDriveToDistance(&navigator, 5, -2.44, 0.6, 0.05);
-			delay(500);
-
-			navigatorDriveToDistance(&navigator, -40, 3.1415, 0.6, 0.05);
-			*/
-
-			// Delete Later
-			//mogoDown();
-			xsens_reset_heading(&xsens, 0, 0, 180);
-
-			// ----
-			//navigatorTurnToAngle(&navigator, 2.35, 0.8, -0.05);
-			//navigator.straightController = straight_controller;
-			//navigatorDriveToDistance(&navigator, 80, 3.1415, 0.6, -0.05);
-
-			mogoDown();
-			navigator.straightController = straight_controller;
-
-			navigator.turnController = short_turn_controller;
-			navigatorTurnToAngle(&navigator, 2.68, 0.8, -0.1);
-			navigatorDriveToDistance(&navigator, 24, 2.68, 0.9, -0.05);
-
+			/mogoDown();
+			navigatorDriveToDistance(&navigator, 15, 0, 0.8, 0.8);
+			navigatorDriveToDistanceUntil(&navigator, 40, 0, 0.9, 0.9, UNTIL_LEFT_LINE);
+			navigatorDriveToDistance(&navigator, 15, 0, 0.9, 0.05);
 			mogoUp();
 			delay(500);
-			navigatorDriveToDistance(&navigator, -4, 2.68, 0.9, 0.05);
 
 			navigator.turnController = normal_mogo_turn_controller;
+			navigatorDriveToDistanceUntil(&navigator, -40, 0, 0.9, 0.8, UNTIL_LEFT_LINE);
+			navigatorDriveToDistance(&navigator, -25, -0.3, 0.6, 0.05);
+			navigatorTurnToAngle(&navigator, toRadians(-150), 0.8, 0.05);
+			mogoDown();
+			navigatorDriveToDistance(&navigator, 4, toRadians(-150), 0.6, 0.05);
+			//delay(750);
+
+			navigatorDriveToDistance(&navigator, -10, toRadians(-150), 0.6, 0.05);
+
+			navigator.turnController = normal_turn_controller;
+			navigatorTurnToAngle(&navigator, toRadians(70), 0.8, 0.05);
+			navigatorDriveToDistance(&navigator, 20, toRadians(67), 0.8, -0.05);
+
+			mogoUp();
+
+			navigator.turnController = normal_mogo_turn_controller;
+
 			navigatorTurnToAngle(&navigator, toRadians(-155), 0.8, -0.05);
-			navigatorDriveToDistance(&navigator, 45, toRadians(-155), 0.9, 0.9);
-			navigatorDriveToDistance(&navigator, 18, toRadians(-135), 0.9, -0.05);
+			navigatorDriveToDistance(&navigator, 35, toRadians(-155), 0.8, 0.8);
+			navigatorSmoothTurnToAngle(&navigator, SMOOTH_TURN_LEFT, toRadians(-135), 0.9, 0.3, 0.9);
+			navigatorDriveToDistance(&navigator, 15, toRadians(-135), 1.0, 0.0);
+
+			mogoDown();
+
+			navigatorDriveToDistanceUntil(&navigator, -17, toRadians(-135), 1.0, 0.1, UNTIL_BACK_LINE);
+*/
+			// Line up and get mogo 3
+			xsens_reset_heading(&xsens, 0, 0, -135);
+			mogoUp();
+
+			navigator.turnController = normal_turn_controller;
+			navigatorTurnToAngle(&navigator, toRadians(135), 0.8, -0.05);
+
+			navigator.until_target = 46;
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(135), 0.6, -0.05, UNTIL_FRONT_LEFT_SONAR);
+
+			navigatorSmoothTurnToAngle(&navigator, SMOOTH_TURN_RIGHT, toRadians(90), 0.8, -0.1, 0);
+			mogoDown();
+			navigatorDriveToDistanceUntil(&navigator, 25, toRadians(90), 0.8, -0.05, UNTIL_RIGHT_LINE);
+			navigatorDriveToDistance(&navigator, 20, toRadians(90), 0.8, 0.1);
+
+			// Pickup Mogo 3
+			mogoUp();
+			delay(500);
+
+			navigatorTurnToAngle(&navigator, toRadians(100), 0.8, -0.05);
+
+			navigatorDriveToDistanceUntil(&navigator, -40, toRadians(100), 0.8, -0.05, UNTIL_LEFT_LINE);
+			navigatorDriveToDistance(&navigator, -30, toRadians(100), 0.8, 0.05);
+
+			navigatorTurnToAngle(&navigator, toRadians(-135), 0.8, -0.05);
+			navigatorDriveToDistance(&navigator, 7, toRadians(-135), 0.8, -0.05);
+
+			// Score Mogo 3
+			mogoDown();
+			delay(750);
+
+			navigatorDriveToDistance(&navigator, -7, toRadians(-135), 0.8, 0.05);
+
+			navigatorTurnToAngle(&navigator, toRadians(135), 0.8, 0.8);
+			navigatorTurnToAngle(&navigator, toRadians(45), 0.8, -0.05);
+
+			navigatorDriveToDistance(&navigator, 21, toRadians(45), 0.8, 0.05);
+
+			// Picks up 4
+			mogoUp();
+			delay(500);
+
+			navigatorDriveToDistance(&navigator, -25, toRadians(45), 0.8, 0.05);
+
+			navigator.turnController = normal_mogo_turn_controller;
+			navigatorTurnToAngle(&navigator, toRadians(-115), 0.8, -0.05);
+			navigatorDriveToDistance(&navigator, 10, toRadians(-115), 0.8, 0.05);
+
+			// Scores 4
 			mogoDown();
 			delay(500);
-			navigatorDriveToDistance(&navigator, -12, toRadians(-135), 1.0, 0.05);
-			mogoUp();
-			navigatorTurnToPoint(&navigator, (Pose){.x = -12, .y = 80}, 0.8, 0.05);
-			navigatorDriveToPoint(&navigator, (Pose){.x = -12, .y = 80}, 0.8, 0.05);
 
-			/*navigatorTurnToAngle(&navigator, 2.6, 1.0, 0.05);
-			navigatorDriveToDistance(&navigator, 15, 2.6, 0.6, -0.05);
-			mogoUp();
-			delay(1000);
-			navigatorTurnToAngle(&navigator, -2.8, 1.0, 0.05);
-			navigatorDriveToDistance(&navigator, 15, -2.8, 0.8, -0.05);
-			navigatorDriveToDistance(&navigator, 15, 3.4, 0.6, -0.05);
-			navigatorDriveToDistance(&navigator, 15, -2.8, 0.6, -0.05);
-			mogoDown();*/
+			navigatorDriveToDistance(&navigator, -7, toRadians(-110), 0.8, 0.05);
+			navigatorTurnToAngle(&navigator, toRadians(135), 0.8, -0.05);
+			navigatorTurnToAngle(&navigator, toRadians(45), 0.8, -0.05);
+			navigatorDriveToDistance(&navigator, 57, toRadians(45), 0.8, 0.05);
 
-			//navigatorTurnToAngle(&navigator, -1.2, -0.8, -0.05);
+			mogoUp();
+
+			navigatorDriveToDistance(&navigator, 18, toRadians(45), 0.8, 0.05);
+
+			// Score #5
+			navigatorTurnToAngle(&navigator, toRadians(25), 0.8, -0.05);
+			navigatorDriveToDistance(&navigator, 25, toRadians(25), 0.8, 0.8);
+			navigatorSmoothTurnToAngle(&navigator, SMOOTH_TURN_LEFT, toRadians(45), 0.9, 0.3, 0.9);
+			navigatorDriveToDistance(&navigator, 15, toRadians(45), 1.0, 0.0);
+
+			mogoDown();
+			delay(500);
+
+			navigatorDriveToDistanceUntil(&navigator, -17, toRadians(45), 1.0, 0.1, UNTIL_BACK_LINE);
+
+			//  Pick up #6
+
 		}
 		if (joystickGetDigital(1, 8, JOY_UP)) {
 			mogoUp();
 		} else if (joystickGetDigital(1, 8, JOY_RIGHT)) {
 			mogoDown();
 		}
+
+		int driveL = joystickGetAnalog(1, 3);
+		int driveR = joystickGetAnalog(1, 2);
+		driveSetPwm(&drive, driveL, driveR);
 		/*if (joystickGetDigital(1, 5, JOY_UP)) {
 			//navigatorDriveToPoint(&navigator, (Pose) {.x = 30.0, .y = 0.0, .theta = 0.0}, 1.0, 0.0);
 		} else {

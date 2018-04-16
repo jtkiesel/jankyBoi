@@ -93,7 +93,7 @@ void navigatorSmoothTurnToAngle(Navigator* navigator, double dir, double angle, 
 				driveSetPower(navigator->drive, deadPower, power);
 			// Right
 			else
-				driveSetPower(navigator->drive, power, deadPower);
+				driveSetPower(navigator->drive, -power, deadPower);
 		} else {
 			if (fabs(endPower) > 0.000001) {
 				driveSetPower(navigator->drive, -endPower, endPower);
@@ -143,6 +143,19 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				if (lineSensorHasLine(&backLine)) break;
 			}
 
+			if ((until & UNTIL_FRONT_LEFT_SONAR) != 0)
+			{
+				int val = ultrasonicGet(front_left_sonar);
+				static good_count = 0;
+				printf("val = %d \n", val);
+
+				if (val > 0 && val < navigator->until_target)
+					good_count++;
+				else good_count = 0;
+
+				if (good_count > 1) break;
+			}
+
 		} else {
 			if (fabs(endPower) > 0.000001) {
 				driveSetPowerAll(navigator->drive, endPower);
@@ -158,6 +171,7 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 		}
 		delay(10);
 	}
+	driveSetPowerAll(navigator->drive, endPower);
 }
 
 void navigatorTurnToAngle(Navigator* navigator, double angle, double maxPower, double endPower) {

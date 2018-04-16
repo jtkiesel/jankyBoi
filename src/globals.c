@@ -44,11 +44,11 @@ void mogoTask() {
 		if (mogoState == MogoUp) {
 			motorSetPower(&motorMogo, 1.0);
 			delay(1200);
-			motorSetPower(&motorMogo, 0.05);
+			motorSetPwm(&motorMogo, 15);
 		} else {
 			motorSetPower(&motorMogo, -1.0);
 			delay(1200);
-			motorSetPower(&motorMogo, -0.05);
+			motorSetPwm(&motorMogo, -15);
 		}
 		lastMogoState = mogoState;
 		mogoDone = true;
@@ -157,7 +157,7 @@ void intakeTask()
 		motorSetPower(&motorRollers, -1.0);
 	}
 
-	printf("Intake Velocity = %d\n", intakeVelocity);
+	//printf("Intake Velocity = %d\n", intakeVelocity);
 
 	lastPosition = intakePosition;
 }

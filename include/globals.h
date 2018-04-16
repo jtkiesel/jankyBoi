@@ -39,6 +39,8 @@ LineSensor leftLine;
 LineSensor rightLine;
 LineSensor backLine;
 
+Ultrasonic front_left_sonar;
+
 PidController liftController;
 
 void compControlTask();

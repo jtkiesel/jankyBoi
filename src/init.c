@@ -92,17 +92,19 @@ void initialize() {
 	xsens_calibrate(&xsens, 100);
 	print("Done calibrating Xsens.\n");
 
-	const Pose initialPose = poseCreate(72, 24, 0);
+	//const Pose initialPose = poseCreate(72, 24, 0);
+	const Pose initialPose = poseCreate(0, 0, 0);
 	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
 
-	encoderRoller = encoderInit(11, 12, false);
+	//encoderRoller = encoderInit(11, 12, false);
+	front_left_sonar = ultrasonicInit(11, 12);
 
 	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
 	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);
 	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
 	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 0.5, 0.05, 0);
+			turnPidController, 0.5, 0.2, 0);
 
 	liftController = pidControllerCreate(0.01, 0.0, 0.03);
 }

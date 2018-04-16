@@ -25,9 +25,7 @@ double pidControllerComputeOutput(PidController* pidController, double error, un
 			+ pidController->Kd * derivative;
 	pidController->t = t;
 	pidController->error = error;
-
-	printf("Derivative = %f\n", (pidController->Kd * derivative));
-
+	
 	return pidController->output;
 }
 
