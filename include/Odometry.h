@@ -17,6 +17,7 @@ typedef struct Odometry {
 	double lastL;
 	double lastR;
 	double lastM;
+	bool useXsensNext;
 } Odometry;
 
 Odometry odometryCreate(EncoderWheel* encoderWheelL, EncoderWheel* encoderWheelR,
@@ -29,5 +30,7 @@ Pose odometryComputePose(Odometry* odometry);
 Pose odometryPose(const Odometry* odometry);
 
 void odometrySetPose(Odometry* odometry, Pose pose);
+
+void odometryUseXsens(Odometry* odometry);
 
 #endif  // ODOMETRY_H_

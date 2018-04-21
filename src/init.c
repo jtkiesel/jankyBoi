@@ -14,6 +14,8 @@
 
 #include "API.h"
 #include "Drive.h"
+#include "EncoderAnalog.h"
+#include "Encoder1Wire.h"
 #include "EncoderWheel.h"
 #include "globals.h"
 #include "Motor.h"
@@ -66,16 +68,17 @@ void initialize() {
 	encoderDriveL = encoderInit(5, 6, true);
 	encoderDriveR = encoderInit(1, 2, false);
 	encoderDriveM = encoderInit(3, 4, false);
+	encoderLift = encoderInit(7, 8, false);
 
-	//print("Initializing IMEs.\n");
-	//imeInitializeAll();
-	//imeReset(imeLift);
-	//print("Done initializing IMEs.\n");
+	encoderRoller = encoderAnalogCreate(7);
+
 
 	int line_toggle = 1200;
 	leftLine = lineSensorCreate(1, line_toggle);
 	rightLine = lineSensorCreate(2, line_toggle);
-	backLine = lineSensorCreate(3, line_toggle);
+
+	leftBarDetect = lineSensorCreate(3, 1050);
+	rightBarDetect = lineSensorCreate(4, 1150);
 
 	/**
 	 * Objects.
@@ -94,18 +97,14 @@ void initialize() {
 
 	//const Pose initialPose = poseCreate(72, 24, 0);
 	const Pose initialPose = poseCreate(0, 0, 0);
-	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.99011, initialPose);
-
-	//encoderRoller = encoderInit(11, 12, false);
-	front_left_sonar = ultrasonicInit(11, 12);
-	front_right_sonar = ultrasonicInit(8, 7);
+	odometry = odometryCreate(&encoderWheelL, &encoderWheelR, &encoderWheelM, &xsens, 7.90, initialPose);
 
 	drive = driveCreate(&motorDriveL, &motorDriveR, &motorDriveL2, &motorDriveR2);
 	const PidController drivePidController = pidControllerCreate(0.15, 0.0, 0.0);
-	const PidController straightPidController = pidControllerCreate(1.5, 0.0, 0.0);
-	const PidController turnPidController = pidControllerCreate(3.0, 0.0, 230000.0);
+	const PidController straightPidController = pidControllerCreate(2, 0, 0);
+	const PidController turnPidController = pidControllerCreate(3.4, 0, 0.26);
 	navigator = navigatorCreate(&drive, &odometry, drivePidController, straightPidController,
-			turnPidController, 0.5, 0.2, 0);
+			turnPidController, 10, 0.5, 0.1, 0);
 
-	liftController = pidControllerCreate(0.01, 0.0, 0.03);
+	liftController = pidControllerCreate(0.01, 0.0, 0.0);
 }

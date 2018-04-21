@@ -53,15 +53,23 @@ Pose odometryComputePose(Odometry* odometry) {
 	double dR = encoderWheelDistance(odometry->encoderWheelR) - odometry->lastR;
 	double dM = odometry->encoderWheelM ?
 			(encoderWheelDistance(odometry->encoderWheelM) - odometry->lastM) : 0;
-	double yaw = xsens_get_yaw(odometry->xsens) / 57.2958;
+	//double yaw = xsens_get_yaw(odometry->xsens) / 57.2958;
 
 	odometry->lastL += dL;
 	odometry->lastR += dR;
 	odometry->lastM += dM;
 
 	double dS = (dR + dL) / 2;
-	Pose dPose = {.theta = boundAngleNegPiToPi(yaw - odometry->pose.theta)};  /*(dR - dL) / odometry->chassisWidth*/
-	double avgTheta = odometry->pose.theta + dPose.theta / 2;
+	//Pose dPose = {.theta = boundAngleNegPiToPi(yaw - odometry->pose.theta)};
+	Pose dPose;
+	double avgTheta;
+	if (odometry->useXsensNext) {
+		dPose.theta = boundAngleNegPiToPi(toRadians(xsens_get_yaw(odometry->xsens))) - odometry->pose.theta;
+		odometry->useXsensNext = false;
+	} else {
+		dPose.theta = (dR - dL) / odometry->chassisWidth;
+	}
+	avgTheta = odometry->pose.theta + dPose.theta / 2;
 
 	dPose.x = dS * cos(avgTheta) + dM * sin(avgTheta);
 	dPose.y = dS * sin(avgTheta) - dM * cos(avgTheta);
@@ -97,4 +105,8 @@ void odometrySetPose(Odometry* odometry, Pose pose) {
 	odometry->pose.theta = pose.theta;
 
 	mutexGive(odometry->mutex);
+}
+
+void odometryUseXsens(Odometry* odometry) {
+	odometry->useXsensNext = true;
 }

@@ -1,6 +1,10 @@
 #include "globals.h"
 
+#include "asciitof.h"
+#include "Motor.h"
+#include "Encoder1Wire.h"
 #include "main.h"
+#include "Odometry.h"
 
 #include <math.h>
 
@@ -11,7 +15,6 @@ void compControlTask() {
 	if (c == 'a') {
 		autonomous();
 	}
-	printf("%d\n", c);
 }
 
 void odometryTask() {
@@ -19,10 +22,40 @@ void odometryTask() {
 }
 
 void debugTask() {
-	printf("(%.3f x, %.3f y, %f theta)\n", odometry.pose.x, odometry.pose.y, odometry.pose.theta);
+	//printf("(%.3f x, %.3f y, %f theta)\n", odometry.pose.x, odometry.pose.y, odometry.pose.theta);
 	//printf("xsens yaw: %.3f\n", xsens_get_yaw(&xsens));
 	//const Vector translation = poseTranslationToPoint(odometry.pose, (Pose) {.x = 30.0, .y = 0.0, .theta = 0.0});//odometryPose(&odometry);
 	//printf("translation: (%.3f size, %f angle)\n", translation.size, translation.angle);
+	//printf("analog: %d\n", analogRead(3));
+	//printf("ultrasonic right: %d\n", ultrasonicGet(front_right_sonar));
+	printf("encoderRoller: %d\n", encoderAnalogCounts(encoderRoller));
+}
+
+PidController* pidTuneController = &navigator.turnController;
+
+void pidTuneTask(void *p) {
+	while (true) {
+		int c = fgetc(stdin);
+		if (c == 'p') {
+			char s[20];
+			int i = 0;
+			while (c != '\n' && i < 20) {
+				c = fgetc(stdin);
+				s[i++] = c;
+			}
+			pidTuneController->Kp = asciitof(s);
+		} else if (c == 'd') {
+			char s[20];
+			int i = 0;
+			while (c != '\n' && i < 20) {
+				c = fgetc(stdin);
+				s[i++] = c;
+			}
+			pidTuneController->Kd = asciitof(s);
+		}
+		printf("Kp: %f Kd: %f\n", pidTuneController->Kp, pidTuneController->Kd);
+		delay(100);
+	}
 }
 
 MogoState mogoState = MogoUp;
@@ -71,92 +104,97 @@ void liftDown() {
 	liftState = LiftDown;
 }
 
+void liftLoads() {
+	liftState = LiftLoads;
+}
+
+void liftPickupLoads() {
+	liftState = LiftPickupLoads;
+}
+
 void liftMid() {
 	liftState = LiftMid;
 }
 
 int getLiftPosition() {
-	int value;
-	imeGet(imeLift, &value);
-	return value;
+	return encoderGet(encoderLift);
 }
 
 void liftTask() {
-
 	int liftPosition = getLiftPosition();
 	double error = 0;
 	double hold = 0;
 
 	if (liftState == LiftDown) {
 		error = 0 - liftPosition;
-		if (abs(error) < 20) hold = 0.05;
+		if (fabs(error) < 20) {
+			hold = 0.05;
+		}
 	} else if (liftState == LiftMid){
 		error = -275 - liftPosition;
 		//if (abs(error) < 20) hold = 0.05;
+	} else if (liftState == LiftLoads) {
+		error = -600 - liftPosition;
+	} else if (liftState == LiftPickupLoads) {
+		error = -800 - liftPosition;
+	} else {
+		error = -1265 - liftPosition;
+		if (fabs(error) < 20) {
+			hold = -0.05;
+		}
 	}
-	else {
-		error = -950 - liftPosition;
-		if (abs(error) < 20) hold = -0.05;
-	}
+	double pidOutput = pidControllerComputeOutput(&liftController, -error, 1);
 
-	double pid_output = pidControllerComputeOutput(&liftController, error, 1);
-
-	if (hold != 0)
+	if (hold != 0) {
 		motorSetPower(&motorLift, hold);
-	else
-	  motorSetPower(&motorLift, pid_output);
-	//printf("lift position %d, output = %f\n", liftPosition, pid_output);
+	} else {
+		motorSetPower(&motorLift, pidOutput);
+	}
+	printf("lift position %d, output = %f\n", liftPosition, pidOutput);
 }
 
-int getIntakePosition()
-{
-	//int value;
-	return encoderGet(encoderRoller);
-	//return value;
+int getIntakePosition() {
+	return (int) encoderAnalogCounts(encoderRoller);
 }
 
 IntakeState intakeState = IntakeNone;
 
-void intakeIn()
-{
+void intakeIn() {
 	intakeState = IntakeIn;
 }
 
-void intakeOut()
-{
+void intakeOut() {
 	intakeState = IntakeOut;
 }
 
-void intakeNone()
-{
+void intakeNone() {
 	intakeState = IntakeNone;
 }
 
-void intakeTask()
-{
+void intakeTask() {
 	static int lastPosition = 0;
-	static int velocity_zero_counter = 0;
+	static int velocityZeroCounter = 0;
 
 	int intakePosition = getIntakePosition();
 	int intakeVelocity = intakePosition - lastPosition;
 
-	if (intakeState == IntakeNone)
-	{
-		motorSetPower(&motorRollers, 0);
-	}
-	else if (intakeState == IntakeIn)
-	{
-		if (intakeVelocity > -2) velocity_zero_counter++;
-		else velocity_zero_counter = 0;
-
-		if (velocity_zero_counter > 3) motorSetPower(&motorRollers, 0.1);
-		else motorSetPower(&motorRollers, 1.0);
-	}
-	else if (intakeState == IntakeOut)
-	{
+	if (intakeState == IntakeNone) {
+		motorSetPower(&motorRollers, 0.1);
+	} else if (intakeState == IntakeIn) {
+		if (abs(intakeVelocity) < 1) {
+			velocityZeroCounter++;
+		} else {
+			velocityZeroCounter = 0;
+		}
+		if (velocityZeroCounter > 4) {
+			motorSetPower(&motorRollers, 0.1);
+			intakeState = IntakeNone;
+		} else {
+			motorSetPower(&motorRollers, 1.0);
+		}
+	} else if (intakeState == IntakeOut) {
 		motorSetPower(&motorRollers, -1.0);
 	}
-
 	//printf("Intake Velocity = %d\n", intakeVelocity);
 
 	lastPosition = intakePosition;
