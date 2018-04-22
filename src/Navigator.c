@@ -155,6 +155,9 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 			if ((until & UNTIL_RIGHT_BAR) != 0 && !lineSensorHasLine(&rightBarDetect)) {
 				break;
 			}
+			if ((until & UNTIL_MOGO_FOUND) != 0 && !lineSensorHasLine(&mogoDetect)) {
+				break;
+			}
 			if ((until & UNTIL_FRONT_LEFT_SONAR) != 0) {
 				int val = ultrasonicGet(front_left_sonar);
 				static int good_count = 0;

@@ -43,6 +43,8 @@ LineSensor rightLine;
 LineSensor leftBarDetect;
 LineSensor rightBarDetect;
 
+LineSensor mogoDetect;
+
 Ultrasonic front_left_sonar;
 Ultrasonic front_right_sonar;
 

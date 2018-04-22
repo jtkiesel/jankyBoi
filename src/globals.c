@@ -28,7 +28,7 @@ void debugTask() {
 	//printf("translation: (%.3f size, %f angle)\n", translation.size, translation.angle);
 	//printf("analog: %d\n", analogRead(3));
 	//printf("ultrasonic right: %d\n", ultrasonicGet(front_right_sonar));
-	printf("encoderRoller: %d\n", encoderAnalogCounts(encoderRoller));
+	//printf("encoderRoller: %d\n", encoderAnalogCounts(encoderRoller));
 }
 
 PidController* pidTuneController = &navigator.turnController;
@@ -74,6 +74,7 @@ void mogoDown() {
 void mogoTask() {
 	static MogoState lastMogoState = MogoUp;
 	if (mogoState != lastMogoState) {
+		lastMogoState = mogoState;
 		if (mogoState == MogoUp) {
 			motorSetPower(&motorMogo, 1.0);
 			delay(1200);
@@ -83,7 +84,6 @@ void mogoTask() {
 			delay(1200);
 			motorSetPwm(&motorMogo, -15);
 		}
-		lastMogoState = mogoState;
 		mogoDone = true;
 	}
 }
@@ -138,7 +138,7 @@ void liftTask() {
 	} else if (liftState == LiftPickupLoads) {
 		error = -800 - liftPosition;
 	} else {
-		error = -1265 - liftPosition;
+		error = -1300 - liftPosition;
 		if (fabs(error) < 20) {
 			hold = -0.05;
 		}
@@ -150,7 +150,7 @@ void liftTask() {
 	} else {
 		motorSetPower(&motorLift, pidOutput);
 	}
-	printf("lift position %d, output = %f\n", liftPosition, pidOutput);
+	//printf("lift position %d, output = %f\n", liftPosition, pidOutput);
 }
 
 int getIntakePosition() {
@@ -179,15 +179,15 @@ void intakeTask() {
 	int intakeVelocity = intakePosition - lastPosition;
 
 	if (intakeState == IntakeNone) {
-		motorSetPower(&motorRollers, 0.1);
+		motorSetPower(&motorRollers, 0.15);
 	} else if (intakeState == IntakeIn) {
 		if (abs(intakeVelocity) < 1) {
 			velocityZeroCounter++;
 		} else {
 			velocityZeroCounter = 0;
 		}
-		if (velocityZeroCounter > 4) {
-			motorSetPower(&motorRollers, 0.1);
+		if (velocityZeroCounter > 6) {
+			motorSetPower(&motorRollers, 0.15);
 			intakeState = IntakeNone;
 		} else {
 			motorSetPower(&motorRollers, 1.0);

@@ -72,18 +72,99 @@ void operatorControl() {
 	while (true) {
 		//printf("encoderRoller = %d\n", encoder1WireCounts(encoderRoller));
 		//printf("ultrasonicLeft = %d\n", ultrasonicGet(front_left_sonar));
-		//printf("ultrasonicRight = %d\n", ultrasonicGet(front_right_sonar));
+	//	printf("ultrasonicRight = %d\n", ultrasonicGet(front_right_sonar));
 		//int val = ultrasonicGet(front_left_sonar);
 		//printf("val = %d \n", val);
 
 
 
 		  int val = analogRead(leftBarDetect.port);
-		  printf("Bar = %d %d\n", val, analogRead(rightBarDetect.port));
+		  printf("Bar = %d %d\n", val, analogRead(5));
 
 		if (joystickGetDigital(1, 7, JOY_DOWN)) {
-			targetAngle += toRadians(90);
-			navigatorTurnToAngle(&navigator, targetAngle, 1.0, 0.0);
+//			targetAngle += toRadians(90);
+//			navigatorTurnToAngle(&navigator, targetAngle, 1.0, 0.0);
+			xsens_reset_heading(&xsens, 0, 0, 0);
+
+
+			liftMid();
+
+			navigator.until_target = 47;
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(0), 0.6, -0.2, UNTIL_FRONT_RIGHT_SONAR);
+			delay(100);
+			navigatorTurnToAngle(&navigator, toRadians(45), 0.6, -0.1);
+
+			mogoDown();
+
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(45), 0.6, -0.2, UNTIL_LEFT_LINE);
+			navigatorDriveToDistanceUntil(&navigator, 40, toRadians(45), 0.9, -0.2, UNTIL_MOGO_FOUND);
+			mogoUp();
+			navigatorDriveToDistance(&navigator, 5, toRadians(45), 0.9, 0.1);
+
+			delay(200);
+
+			//drivers backwards after picking up mogo
+
+			navigatorTurnToAngle(&navigator, toRadians(25), 0.9, -0.1);
+			navigatorDriveToDistanceUntil(&navigator, -30, toRadians(25), 0.9, -0.2, UNTIL_RIGHT_LINE);
+			navigatorDriveToDistance(&navigator, -10, toRadians(25), 0.9, 0.2);
+			navigatorTurnToAngle(&navigator, toRadians(-105), 0.9, -0.1);
+
+			mogoDown();
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-105), 0.9, -0.2, UNTIL_LEFT_LINE);
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-105), 0.9, -0.2, UNTIL_LEFT_BAR);
+			delay(500);
+
+			//score goal
+
+			navigatorDriveToDistance(&navigator, -5, toRadians(-105), 0.9, 0.2);
+			delay(100);
+			mogoUp();
+
+			//turn towards mogo 7
+
+			printf("---Mogo7---");
+			navigatorTurnToAngle(&navigator, toRadians(180), 0.9, -0.1);
+			navigatorDriveToDistance(&navigator, 10, toRadians(180), 0.9, 0);
+			navigator.until_target = 40;
+
+			liftUp();
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(180), 0.6, -0.2, UNTIL_FRONT_LEFT_SONAR);
+			delay(100);
+
+			intakeIn();
+
+			mogoDown();
+			navigatorTurnToAngle(&navigator, toRadians(140), 0.6, -0.1);
+
+
+
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(140), 0.9, -0.2, UNTIL_RIGHT_LINE);
+			navigatorDriveToDistanceUntil(&navigator, 40, toRadians(137), 0.9, -0.2, UNTIL_MOGO_FOUND);
+			mogoUp();
+			liftDown();
+
+			navigatorDriveToDistance(&navigator, 5, toRadians(140), 0.9, 0.1);
+			delay(200);
+
+			//drivers backwards after picking up mogo
+
+			navigatorTurnToAngle(&navigator, toRadians(155), 0.9, -0.1);
+			navigatorDriveToDistance(&navigator, -30, toRadians(155), 0.9, -0.2);
+			navigatorTurnToAngle(&navigator, toRadians(-75), 0.9, -0.1);
+
+			intakeOut();
+			liftMid();
+
+			mogoDown();
+
+			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-75), 0.9, 0.2, UNTIL_RIGHT_BAR);
+
+			delay(100);
+
+			navigatorDriveToDistance(&navigator, -2, toRadians(-75), 0.9, 0.2);
+			delay(100);
+
 		}
 		odometryUseXsens(navigator.odometry);
 
@@ -270,7 +351,7 @@ void operatorControl() {
 			// DELETE LATER
 			xsens_reset_heading(&xsens, 0, 0, 45);
 			odometryUseXsens(navigator.odometry);
-			mogoDown();
+			mogoUp();
 			liftMid();
 			// ----
 
@@ -281,7 +362,7 @@ void operatorControl() {
 			navigator.turnController = normal_turn_controller;
 			navigatorTurnToAngle(&navigator, toRadians(135), 0.8, -0.05);
 
-			navigator.until_target = 57;
+			navigator.until_target = 55;
 			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(135), 0.6, -0.05, UNTIL_FRONT_RIGHT_SONAR);
 
 			navigatorSmoothTurnToAngle(&navigator, SMOOTH_TURN_LEFT, toRadians(180), 0.8, -0.1, 0);
@@ -294,11 +375,11 @@ void operatorControl() {
 			mogoUp();
 			delay(500);
 
-			navigatorTurnToAngle(&navigator, toRadians(163), 0.8, -0.05);
+			navigatorTurnToAngle(&navigator, toRadians(160), 0.8, -0.05);
 
-			navigatorDriveToDistanceUntil(&navigator, -40, toRadians(163), 0.6, 0.2, UNTIL_RIGHT_LINE);
+			navigatorDriveToDistanceUntil(&navigator, -40, toRadians(160), 0.6, 0.2, UNTIL_RIGHT_LINE);
 			delay(100);
-			navigatorDriveToDistanceUntil(&navigator, 10, toRadians(163), 0.3, 0.1, UNTIL_RIGHT_LINE);
+			navigatorDriveToDistanceUntil(&navigator, 10, toRadians(160), 0.3, 0.1, UNTIL_RIGHT_LINE);
 			delay(200);
 			liftPickupLoads();
 			intakeIn();

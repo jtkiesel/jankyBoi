@@ -80,6 +80,8 @@ void initialize() {
 	leftBarDetect = lineSensorCreate(3, 1050);
 	rightBarDetect = lineSensorCreate(4, 1150);
 
+	mogoDetect = lineSensorCreate(5, 1000);
+
 	/**
 	 * Objects.
 	 */
