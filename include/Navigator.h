@@ -46,6 +46,7 @@ Navigator navigatorCreate(Drive* drive, Odometry* odometry, PidController driveC
 void navigatorDriveAtAngle(Navigator* navigator, double angle, double power);
 
 bool navigatorTurnTowardsPoint(Navigator* navigator, Pose point, double maxPower, double endPower);
+void navigatorDriveForTime(Navigator* navigator, double leftPower, double rightPower, double time);
 
 void navigatorDriveToDistance(Navigator* navigator, double distance, double angle, double maxPower, double endPower);
 

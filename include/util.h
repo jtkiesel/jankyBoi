@@ -20,6 +20,8 @@ extern const double kPi;
  * @param d  The floating-point value whose signum is to be returned.
  * @return   The signum function of the argument.
  */
+ int sgn(int d);
+ 
 double signum(double d);
 
 double toDegrees(double radians);

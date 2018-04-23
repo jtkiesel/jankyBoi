@@ -11,6 +11,10 @@
 #include "LineSensor.h"
 #include "xsens.h"
 
+// Skills bot mogo tipper ports
+#define mogo_tipper_port 23
+#define mogo_release_tipper_port 24
+
 Motor motorDriveL;
 Motor motorDriveL2;
 Motor motorRollers;
@@ -62,9 +66,10 @@ void debugTask();
 
 typedef enum MogoState {
 	MogoUp,
-	MogoDown
+	MogoDown,
+	MogoHoldUp,
 } MogoState;
-
+void mogoHoldUp();
 void mogoUp();
 
 void mogoDown();

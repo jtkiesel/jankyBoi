@@ -46,6 +46,13 @@ void navigatorDriveAtAngle(Navigator* navigator, double angle, double power) {
 	driveSetPower(navigator->drive, powerLeft, powerRight);
 }
 
+void navigatorDriveForTime(Navigator* navigator, double leftPower, double rightPower, double time)
+{
+	driveSetPower(navigator->drive, leftPower, rightPower);
+
+	delay(time);
+}
+
 void navigatorDriveToDistance(Navigator* navigator, double distance, double angle, double maxPower, double endPower) {
 	const double target = (encoderWheelDistance(navigator->odometry->encoderWheelL)
 			+ encoderWheelDistance(navigator->odometry->encoderWheelR)) / 2.0 + distance;
@@ -163,7 +170,7 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				static int good_count = 0;
 				printf("val = %d \n", val);
 
-				if (val > 0 && val < navigator->until_target) {
+				if (val > 0 && sgn(navigator->until_target) * val < navigator->until_target) {
 					good_count++;
 				} else {
 					good_count = 0;
@@ -177,7 +184,7 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				static int good_count_r = 0;
 				printf("val = %d \n", val);
 
-				if (val > 0 && val < navigator->until_target) {
+				if (val > 0 && sgn(navigator->until_target) * val < navigator->until_target) {
 					good_count_r++;
 				} else {
 					good_count_r = 0;

@@ -71,9 +71,18 @@ void mogoDown() {
 	mogoState = MogoDown;
 }
 
+void mogoHoldUp() {
+	mogoDone = true;
+	mogoState = MogoHoldUp;
+}
+
 void mogoTask() {
 	static MogoState lastMogoState = MogoUp;
-	if (mogoState != lastMogoState) {
+	if (mogoState == MogoHoldUp)
+	{
+		motorSetPwm(&motorMogo, 30);
+	}
+	else if (mogoState != lastMogoState) {
 		lastMogoState = mogoState;
 		if (mogoState == MogoUp) {
 			motorSetPower(&motorMogo, 1.0);
@@ -138,7 +147,7 @@ void liftTask() {
 	} else if (liftState == LiftPickupLoads) {
 		error = -800 - liftPosition;
 	} else {
-		error = -1300 - liftPosition;
+		error = -1325 - liftPosition;
 		if (fabs(error) < 20) {
 			hold = -0.05;
 		}
@@ -180,19 +189,21 @@ void intakeTask() {
 
 	if (intakeState == IntakeNone) {
 		motorSetPower(&motorRollers, 0.15);
+		velocityZeroCounter = 0;
 	} else if (intakeState == IntakeIn) {
 		if (abs(intakeVelocity) < 1) {
 			velocityZeroCounter++;
 		} else {
 			velocityZeroCounter = 0;
 		}
-		if (velocityZeroCounter > 6) {
+		if (velocityZeroCounter > 13) {
 			motorSetPower(&motorRollers, 0.15);
 			intakeState = IntakeNone;
 		} else {
 			motorSetPower(&motorRollers, 1.0);
 		}
 	} else if (intakeState == IntakeOut) {
+		velocityZeroCounter = 0;
 		motorSetPower(&motorRollers, -1.0);
 	}
 	//printf("Intake Velocity = %d\n", intakeVelocity);

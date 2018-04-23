@@ -77,10 +77,14 @@ void initialize() {
 	leftLine = lineSensorCreate(1, line_toggle);
 	rightLine = lineSensorCreate(2, line_toggle);
 
-	leftBarDetect = lineSensorCreate(3, 1050);
-	rightBarDetect = lineSensorCreate(4, 1150);
+
+	leftBarDetect = lineSensorCreate(3, analogRead(3)+150);
+	rightBarDetect = lineSensorCreate(4, analogRead(4)+150);
 
 	mogoDetect = lineSensorCreate(5, 1000);
+
+	pinMode(mogo_release_tipper_port, OUTPUT);
+	pinMode(mogo_tipper_port, OUTPUT);
 
 	/**
 	 * Objects.

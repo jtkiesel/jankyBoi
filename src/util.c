@@ -6,6 +6,11 @@
 
 const double kPi = 3.14159265358979323846;
 
+int sgn(int d) {
+	if (d < 0) return -1;
+	return 1;
+}
+
 double signum(double d) {
 	return (d == 0.0 || isnan(d)) ? d : copysign(1.0, d);
 }
