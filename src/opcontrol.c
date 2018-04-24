@@ -28,59 +28,73 @@ PidController straight_controller;
 PidController naive_turn_controller;
 PidController short_turn_controller;
 PidController normal_turn_controller;
+PidController normal_right_turn_controller;
 PidController normal_mogo_turn_controller;
 PidController double_mogo_turn_controller;
+
+void PSC_score_right_wall(double offset)
+{
+	navigator.turnController = normal_mogo_turn_controller;
+	navigatorDriveToDistanceUntil(&navigator, -80, toRadians(-4+offset), 0.9, 0.2, UNTIL_RIGHT_LINE);
+	navigatorDriveToDistance(&navigator, -13, toRadians(-4+offset), 1, 0.05);
+	delay(100);
+	liftDown();
+	navigatorTurnToAngle(&navigator, toRadians(-45+offset), 0.8, 0.05);
+	intakeOut();
+
+	navigator.until_target = -45;
+	navigatorDriveToDistanceUntil(&navigator, -40, toRadians(-45+offset), 0.6, 0.2, UNTIL_FRONT_RIGHT_SONAR);
+
+	delay(200);
+	liftMid();
+	navigatorTurnToAngle(&navigator, toRadians(-145+offset), 0.8, 0.1);//-150(-155)
+	mogoDown();
+	delay(200);
+
+	// Score Mogo
+	printf("Until left bar");
+	navigatorDriveToDistanceUntil(&navigator, 30, toRadians(-145+offset), 0.4, -0.1, UNTIL_LEFT_BAR);//4,-150,0.6,.0.05(6,-155,0.7,0.05)
+
+	waitUntilMogo();
+//	mogoUp();
+	navigatorDriveToDistance(&navigator, -5, toRadians(-145+offset), 0.6, 0.2);
+	mogoUp();
+	navigatorDriveToDistance(&navigator, -5, toRadians(-145+offset), 0.6, 0.2);
+	delay(100);
+	navigatorTurnToAngle(&navigator, toRadians(-45+offset), 0.9, -0.1);//-150(-155)
+	delay(100);
+	navigator.until_target = -43;
+	navigatorDriveToDistanceUntil(&navigator, -40, toRadians(-45+offset), 0.6, 0.2, UNTIL_FRONT_RIGHT_SONAR);
+	//navigatorDriveToDistanceUntil(&navigator, 30, toRadians(-45), 0.6, -0.1, UNTIL_FRONT_LEFT_SONAR);
+	delay(100);
+	navigatorTurnToAngle(&navigator, toRadians(45+offset), 0.9, -0.1);
+	liftDown();
+	mogoDown();
+	delay(100);
+	driveSetPower(navigator.drive, 0, 0);
+}
 
 void PSC_first_mogo()
 {
 	mogoDown();
-	intakeIn();
+	intakeFullIn();
 	liftMid();
 	delay(500);
-	navigatorDriveToDistance(&navigator, 15, 0, 0.95, 0.95);
+	navigatorDriveToDistance(&navigator, 15, 0, 1, 1);
+	intakeNone();
 	//navigatorDriveToDistanceUntil(&navigator, 40, 0, 0.95, 0.95, UNTIL_RIGHT_LINE);
-	navigatorDriveToDistanceUntil(&navigator, 80, 0, 0.95, -0.05, UNTIL_MOGO_FOUND);
+	navigatorDriveToDistanceUntil(&navigator, 80, 0, 1, -0.1, UNTIL_MOGO_FOUND);
 	//navigatorDriveToDistance(&navigator, 17, 0, 0.95, 0.05);
 	mogoUp();
 	delay(500);
 
-	navigator.turnController = normal_mogo_turn_controller;
-	navigatorDriveToDistanceUntil(&navigator, -80, 0, 0.9, 0.2, UNTIL_RIGHT_LINE);
-	navigatorDriveToDistance(&navigator, -10, 0, 0.95, 0.05);
-	delay(100);
-	navigatorTurnToAngle(&navigator, toRadians(-45), 0.8, 0.05);
-	liftDown();
-
-	navigator.until_target = -57;
-	navigatorDriveToDistanceUntil(&navigator, -40, toRadians(-45), 0.6, 0.2, UNTIL_FRONT_RIGHT_SONAR);
-
-	intakeOut();
-	liftMid();
-	delay(100);
-	navigatorTurnToAngle(&navigator, toRadians(-145), 0.8, 0.1);//-150(-155)
-	mogoDown();
-	delay(200);
-
-	// Score #1
-
-	navigatorDriveToDistanceUntil(&navigator, 30, toRadians(-145), 0.4, -0.1, UNTIL_LEFT_BAR);//4,-150,0.6,.0.05(6,-155,0.7,0.05)
-
-//	mogoUp();
-	navigatorDriveToDistance(&navigator, -5, toRadians(-145), 0.6, 0.2);
-	mogoUp();
-	navigatorDriveToDistance(&navigator, -5, toRadians(-145), 0.6, 0.2);
-	delay(100);
-	liftDown();
-	mogoDown();
-	navigatorTurnToAngle(&navigator, toRadians(45), 0.8, 0.1);//-150(-155)
-	delay(200);
-	driveSetPower(navigator.drive, 0, 0);
+	PSC_score_right_wall(0);
 }
 
 void PSC_double_mogo(double offset)
 {
+	digitalWrite(mogo_tipper_port, LOW);
 	digitalWrite(mogo_release_tipper_port, LOW);
-	digitalWrite(mogo_tipper_port, HIGH);
 
 	navigator.turnController = normal_turn_controller;
 	liftUp();
@@ -88,47 +102,154 @@ void PSC_double_mogo(double offset)
 	mogoDown();
 	delay(1200);
 	navigatorDriveToDistance(&navigator, 10, toRadians(0+offset), 0.9, -0.1);
-	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(0+offset), 0.9, -0.1, UNTIL_MOGO_FOUND);
-	navigatorDriveToDistance(&navigator, 10, toRadians(0+offset), 0.9, -0.1);
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(0+offset), 0.9, -0.1, UNTIL_LEFT_LINE);
+	navigatorDriveToDistance(&navigator, 9, toRadians(0+offset), 0.9, -0.1);
 	mogoUp();
-	navigatorDriveToDistance(&navigator, 10, toRadians(0+offset), 0.9, -0.1);
+
+	delay(500);
+	//liftMid();
+	//navigatorTurnToAngle(&navigator, toRadians(10+offset), 0.8, -0.1);
+//	delay(100);
+	//navigatorDriveToDistance(&navigator, 5, toRadians(7+offset), 0.9, -0.1);
+	intakeNone();
 	liftDown();
 	delay(1600);
 	intakeOut();
+	delay(200);
 	liftUp();
-	delay(500);
-	intakeIn();
-	delay(500);
+	delay(800);
+	intakeFullIn();
+	delay(200);
 	navigator.turnController = normal_mogo_turn_controller;
 
-	navigatorTurnToAngle(&navigator, toRadians(15+offset), 1.0, -0.1);
+	digitalWrite(mogo_tipper_port, HIGH);
+	navigatorDriveToDistance(&navigator, 4, toRadians(18+offset), 0.9, -0.1);
+	navigatorTurnToAngle(&navigator, toRadians(18+offset), 1.0, -0.1);
 	delay(100);
-	navigatorDriveToDistance(&navigator, 15, toRadians(15+offset), 0.9, -0.25);
-	liftDown();
-
+	navigatorDriveToDistance(&navigator, 15, toRadians(18+offset), 0.8, -0.25);
    // delay(250);
 	digitalWrite(mogo_release_tipper_port, HIGH);
 	delay(250);
 	digitalWrite(mogo_tipper_port, LOW);
+	intakeNone();
 	navigator.turnController = double_mogo_turn_controller;
-	navigatorTurnToAngle(&navigator, toRadians(-20+offset), 1.0, 0.0);
-	navigatorDriveToDistance(&navigator, 9, toRadians(-20+offset), 0.9, -0.1);
-	navigatorTurnToAngle(&navigator, toRadians(25+offset), 1.0, 0.0);
-	navigatorDriveToDistance(&navigator, 15, toRadians(25+offset), 0.9, -0.1);
+	navigatorDriveToDistance(&navigator, -3, toRadians(-20+offset), 0.9, -0.1);
+	liftDown();
+	navigatorTurnToAngle(&navigator, toRadians(-20+offset), 1.0, 0.1);
+	navigatorDriveToDistance(&navigator, 11, toRadians(-20+offset), 0.9, -0.1);
+	navigatorTurnToAngle(&navigator, toRadians(17+offset), 1.0, -0.1);
+	delay(100);
+	navigatorDriveToDistance(&navigator, 15, toRadians(17+offset), 0.9, -0.1);
 
-	navigatorDriveForTime(&navigator, 1.0, 1.0, 1000);
-
-	navigatorDriveForTime(&navigator, 1.0, 1.0, 250);
-	digitalWrite(mogo_tipper_port, HIGH);
-	digitalWrite(mogo_release_tipper_port, LOW);
 	intakeOut();
 	liftMid();
 
+	navigatorDriveForTime(&navigator, 1.0, 1.0, 250);
+	navigatorDriveForTime(&navigator, 1.0, 1.0, 1000);
+
+	digitalWrite(mogo_tipper_port, HIGH);
+	digitalWrite(mogo_release_tipper_port, LOW);
+
 	navigatorDriveToDistance(&navigator, -5, toRadians(0+offset), 0.9, -0.1);
 	mogoDown();
-	navigatorDriveToDistance(&navigator, -10, toRadians(0+offset), 0.9, -0.1);
+	navigatorDriveToDistance(&navigator, -10, toRadians(0+offset), 0.9, 0.2);
+	waitUntilMogo();
+	navigatorDriveToDistanceUntil(&navigator, -30, toRadians(0+offset), 0.6, -0.1, UNTIL_BACK_LINE);
+	navigatorDriveToDistance(&navigator, -3, toRadians(0+offset), 0.9, -0.1);
+	mogoUp();
+}
+
+void PSC_mogo_on_left_wall(double offset, int version)
+{
+	navigator.turnController = normal_right_turn_controller;
+
+	navigatorTurnToAngle(&navigator, toRadians(135+offset), 0.7, 0.1);
+	delay(200);
+	navigatorDriveToDistance(&navigator, 10, toRadians(135+offset), 0.7, 0);
+	navigator.until_target = 36;
+
+	liftUp();
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(135+offset), 0.5, -0.2, UNTIL_FRONT_LEFT_SONAR);
+	delay(100);
+
+	intakeIn();
+
+	mogoDown();
+	navigatorTurnToAngle(&navigator, toRadians(95+offset), 0.6, 0.1);
+
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(95+offset), 0.6, -0.2, UNTIL_RIGHT_LINE);
+	intakeNone();
+	liftMid();
 	delay(500);
-	navigatorDriveToDistance(&navigator, -5, toRadians(0+offset), 0.9, -0.1);
+
+	navigatorDriveToDistanceUntil(&navigator, 40, toRadians(95+offset), 0.9, -0.2, UNTIL_MOGO_FOUND);
+	mogoUp();
+
+	waitUntilMogo();
+	liftDown();
+	delay(300);
+	intakeOut();
+	delay(200);
+	liftUp();
+	navigatorDriveToDistance(&navigator, -10, toRadians(95+offset), 0.9, 0.1);
+	intakeIn();
+	delay(750);
+	navigatorDriveToDistance(&navigator, 7, toRadians(95+offset), 0.9, 0.1);
+	delay(500);
+	intakeNone();
+	liftDown();
+	navigatorDriveToDistance(&navigator, -15, toRadians(95+offset), 0.9, 0.1);
+	//drivers backwards after picking up mogo
+	navigatorTurnToAngle(&navigator, toRadians(110+offset), 0.9, -0.1);
+	navigatorDriveToDistance(&navigator, -23, toRadians(110+offset), 0.9, -0.2);
+	navigatorTurnToAngle(&navigator, toRadians(-135+offset), 0.9, -0.1);
+
+	intakeOut();
+	delay(200);
+	liftMid();
+
+	mogoDown();
+
+	printf("Until Right Line");
+	//navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-135+offset), 0.4, -0.2, UNTIL_RIGHT_LINE);
+	navigatorDriveToDistance(&navigator, 4, toRadians(-135+offset), 0.4, -0.2);
+	printf("Until Right Bar");
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-135+offset), 0.4, -0.1, UNTIL_RIGHT_BAR);
+
+	waitUntilMogo();
+	delay(100);
+
+	navigatorDriveToDistanceUntil(&navigator, -30, toRadians(-135+offset), 0.6, -0.1, UNTIL_BACK_LINE);
+}
+
+void PSC_mogo_on_right_wall(double offset)
+{
+	navigator.turnController = normal_turn_controller;
+
+	// Aligns with lines
+	liftMid();
+	mogoUp();
+	navigatorTurnToAngle(&navigator, toRadians(-45+offset), 0.7, -0.2);
+	delay(100);
+
+	// Aligns with wall
+	navigator.until_target = 43;
+	navigatorDriveToDistance(&navigator, 15, toRadians(-45+offset), 0.6, 0);
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-45+offset), 0.6, -0.3, UNTIL_FRONT_RIGHT_SONAR);
+	delay(100);
+	mogoDown();
+	navigatorTurnToAngle(&navigator, toRadians(0+offset), 0.6, -0.1);
+
+	// Picks up mogo
+	liftMid();
+	delay(500);
+	navigatorDriveToDistance(&navigator, 15, toRadians(0+offset), 1, 1);
+	navigatorDriveToDistanceUntil(&navigator, 80, toRadians(0+offset), 1, -0.1, UNTIL_MOGO_FOUND);
+	mogoUp();
+	delay(500);
+
+	// Scores mogo
+	PSC_score_right_wall(offset);
 }
 
 /*
@@ -155,13 +276,13 @@ void operatorControl() {
 	int mogo;
 
 	//taskRunLoop(compControlTask, 100);
-	taskRunLoop(odometryTask, 2);
-	taskRunLoop(debugTask, 100);
+	taskRunLoop(odometryTask, 5);
+	//taskRunLoop(debugTask, 100);
 	taskRunLoop(mogoTask, 20);
 
 	taskRunLoop(liftTask, 20);
 	taskRunLoop(intakeTask, 50);
-	taskRunLoop(encoderAnalogTask, 5);
+	taskRunLoop(encoderAnalogTask, 10);
 
   	//liftDown();
 	//intakeIn();
@@ -172,7 +293,7 @@ void operatorControl() {
 	//point = (Pose) {.x = 0.0, .y = 0.0, .theta = 0.0};
 	//navigatorDriveToPoint(&navigator, point, -1.0, 0.0);
 
-	taskCreate(pidTuneTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+	//taskCreate(pidTuneTask, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
 	double targetAngle = 0.0;
 
@@ -182,8 +303,9 @@ void operatorControl() {
 	 normal_turn_controller = pidControllerCreate(1.8, 0, 0.11);
 	 normal_mogo_turn_controller = pidControllerCreate(2.5, 0, 0.25);
 	 double_mogo_turn_controller = pidControllerCreate(3.0, 0, 0.4);
+	 normal_right_turn_controller = pidControllerCreate(2.4, 0, 0.11);
 
-	//front_left_sonar = ultrasonicInit(11, 9);
+    //front_left_sonar = ultrasonicInit(11, 9);
 	//front_right_sonar = ultrasonicInit(12, 10);
 
 	while (true) {
@@ -195,17 +317,25 @@ void operatorControl() {
 
 
 
-		 // int val = analogRead(leftBarDetect.port);
-		  //int val2 = analogRead(rightBarDetect.port);
-		 // int val = ultrasonicGet(front_left_sonar);
-		 //int val2 = ultrasonicGet(front_right_sonar);
-		 //printf("Bar = %d %d\n", val, val2);
+		 int val = analogRead(leftBarDetect.port);
+		 int val2 = analogRead(rightBarDetect.port);
+		 int val3 = analogRead(backLine.port);
+		  //int val = ultrasonicGet(front_left_sonar);
+		 //int val2 = 0;//ultrasonicGet(front_right_sonar);
+		 printf("Bar = %d %d %d\n", val, val2, val3);
 
 		  if (joystickGetDigital(1, 8, JOY_UP))
 		  {
 			  xsens_reset_heading(&xsens, 0, 0, 0);
+			  odometryUseXsens(navigator.odometry);
 			  PSC_first_mogo();
 			  PSC_double_mogo(45);
+			  //xsens_reset_heading(&xsens, 0, 0, 45);
+			  //odometryUseXsens(navigator.odometry);
+			  PSC_mogo_on_left_wall(180, 0);
+			  PSC_mogo_on_right_wall(180);
+			  PSC_double_mogo(-135);
+			  //PSC_mogo_on_left_wall(0, 0);
 		  }
 
 		  /*if (joystickGetDigital(1, 8, JOY_UP)) {
@@ -234,83 +364,11 @@ void operatorControl() {
 			xsens_reset_heading(&xsens, 0, 0, 0);
 
 
-			liftMid();
 
-			navigator.until_target = 47;
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(0), 0.6, -0.2, UNTIL_FRONT_RIGHT_SONAR);
-			delay(100);
-			navigatorTurnToAngle(&navigator, toRadians(45), 0.6, -0.1);
-
-			mogoDown();
-
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(45), 0.6, -0.2, UNTIL_LEFT_LINE);
-			navigatorDriveToDistanceUntil(&navigator, 40, toRadians(45), 0.9, -0.2, UNTIL_MOGO_FOUND);
-			mogoUp();
-			navigatorDriveToDistance(&navigator, 5, toRadians(45), 0.9, 0.1);
-
-			delay(200);
-
-			//drivers backwards after picking up mogo
-
-			navigatorTurnToAngle(&navigator, toRadians(25), 0.9, -0.1);
-			navigatorDriveToDistanceUntil(&navigator, -30, toRadians(25), 0.9, -0.2, UNTIL_RIGHT_LINE);
-			navigatorDriveToDistance(&navigator, -10, toRadians(25), 0.9, 0.2);
-			navigatorTurnToAngle(&navigator, toRadians(-105), 0.9, -0.1);
-
-			mogoDown();
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-105), 0.9, -0.2, UNTIL_LEFT_LINE);
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-105), 0.9, -0.2, UNTIL_LEFT_BAR);
-			delay(500);
-
-			//score goal
-
-			navigatorDriveToDistance(&navigator, -5, toRadians(-105), 0.9, 0.2);
-			delay(100);
-			mogoUp();
 
 			//turn towards mogo 7
 
 			printf("---Mogo7---");
-			navigatorTurnToAngle(&navigator, toRadians(180), 0.9, -0.1);
-			navigatorDriveToDistance(&navigator, 10, toRadians(180), 0.9, 0);
-			navigator.until_target = 40;
-
-			liftUp();
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(180), 0.6, -0.2, UNTIL_FRONT_LEFT_SONAR);
-			delay(100);
-
-			intakeIn();
-
-			mogoDown();
-			navigatorTurnToAngle(&navigator, toRadians(140), 0.6, -0.1);
-
-
-
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(140), 0.9, -0.2, UNTIL_RIGHT_LINE);
-			navigatorDriveToDistanceUntil(&navigator, 40, toRadians(137), 0.9, -0.2, UNTIL_MOGO_FOUND);
-			mogoUp();
-			liftDown();
-
-			navigatorDriveToDistance(&navigator, 5, toRadians(140), 0.9, 0.1);
-			delay(200);
-
-			//drivers backwards after picking up mogo
-
-			navigatorTurnToAngle(&navigator, toRadians(155), 0.9, -0.1);
-			navigatorDriveToDistance(&navigator, -30, toRadians(155), 0.9, -0.2);
-			navigatorTurnToAngle(&navigator, toRadians(-75), 0.9, -0.1);
-
-			intakeOut();
-			liftMid();
-
-			mogoDown();
-
-			navigatorDriveToDistanceUntil(&navigator, 80, toRadians(-75), 0.9, 0.2, UNTIL_RIGHT_BAR);
-
-			delay(100);
-
-			navigatorDriveToDistance(&navigator, -2, toRadians(-75), 0.9, 0.2);
-			delay(100);
 
 		}
 		odometryUseXsens(navigator.odometry);
@@ -601,9 +659,9 @@ void operatorControl() {
 			mogoDown();
 		}*/
 		if (joystickGetDigital(1, 6, JOY_UP)) {
-			liftUp();
+			mogoUp();
 		} else if (joystickGetDigital(1, 6, JOY_DOWN)) {
-			liftDown();
+			mogoDown();
 		}
 
 		int driveL = joystickGetAnalog(1, 3);

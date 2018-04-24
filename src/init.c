@@ -76,7 +76,7 @@ void initialize() {
 	int line_toggle = 1200;
 	leftLine = lineSensorCreate(1, line_toggle);
 	rightLine = lineSensorCreate(2, line_toggle);
-
+	backLine = lineSensorCreate(6, line_toggle);
 
 	leftBarDetect = lineSensorCreate(3, analogRead(3)+150);
 	rightBarDetect = lineSensorCreate(4, analogRead(4)+150);

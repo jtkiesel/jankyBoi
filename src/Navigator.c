@@ -156,6 +156,9 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 			if ((until & UNTIL_RIGHT_LINE) != 0 && lineSensorHasLine(&rightLine)) {
 				break;
 			}
+			if ((until & UNTIL_BACK_LINE) != 0 && lineSensorHasLine(&backLine)) {
+				break;
+			}
 			if ((until & UNTIL_LEFT_BAR) != 0 && !lineSensorHasLine(&leftBarDetect)) {
 				break;
 			}
@@ -171,11 +174,18 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				printf("val = %d \n", val);
 
 				if (val > 0 && sgn(navigator->until_target) * val < navigator->until_target) {
-					good_count++;
-				} else {
+					if ( navigator->until_target < 0 && val < -navigator->until_target+20) {
+						good_count++;
+					} else if (navigator->until_target > 0 && val > navigator->until_target-30 ){
+						good_count++;
+					}
+
+				} else if (val == -1){ }
+				else {
 					good_count = 0;
 				}
-				if (good_count > 1) {
+				if (good_count > 0) {
+					good_count = 0;
 					break;
 				}
 			}
@@ -185,11 +195,16 @@ void navigatorDriveToDistanceUntil(Navigator* navigator, double distance, double
 				printf("val = %d \n", val);
 
 				if (val > 0 && sgn(navigator->until_target) * val < navigator->until_target) {
-					good_count_r++;
+					if ( navigator->until_target < 0 && val < -navigator->until_target+20) {
+						good_count_r++;
+					} else if (navigator->until_target > 0 && val > navigator->until_target-30 ){
+						good_count_r++;
+					}
 				} else {
 					good_count_r = 0;
 				}
-				if (good_count_r > 1) {
+				if (good_count_r > 0) {
+					good_count_r = 0;
 					break;
 				}
 			}

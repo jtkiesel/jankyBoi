@@ -86,11 +86,11 @@ void mogoTask() {
 		lastMogoState = mogoState;
 		if (mogoState == MogoUp) {
 			motorSetPower(&motorMogo, 1.0);
-			delay(1200);
+			delay(1000);
 			motorSetPwm(&motorMogo, 15);
 		} else {
 			motorSetPower(&motorMogo, -1.0);
-			delay(1200);
+			delay(1000);
 			motorSetPwm(&motorMogo, -15);
 		}
 		mogoDone = true;
@@ -149,7 +149,7 @@ void liftTask() {
 	} else {
 		error = -1325 - liftPosition;
 		if (fabs(error) < 20) {
-			hold = -0.05;
+			hold = -0.1;
 		}
 	}
 	double pidOutput = pidControllerComputeOutput(&liftController, -error, 1);
@@ -180,6 +180,10 @@ void intakeNone() {
 	intakeState = IntakeNone;
 }
 
+void intakeFullIn() {
+	intakeState = IntakeFullIn;
+}
+
 void intakeTask() {
 	static int lastPosition = 0;
 	static int velocityZeroCounter = 0;
@@ -187,26 +191,36 @@ void intakeTask() {
 	int intakePosition = getIntakePosition();
 	int intakeVelocity = intakePosition - lastPosition;
 
-	if (intakeState == IntakeNone) {
+	if (intakeState == IntakeFullIn) {
+		motorSetPower(&motorRollers, 1.0);
+		//printf("IntakeFullin\n");
+	}
+	else if (intakeState == IntakeNone) {
 		motorSetPower(&motorRollers, 0.15);
 		velocityZeroCounter = 0;
+		//printf("IntakeNone\n");
 	} else if (intakeState == IntakeIn) {
-		if (abs(intakeVelocity) < 1) {
+		if (abs(intakeVelocity) < 2) {
 			velocityZeroCounter++;
 		} else {
 			velocityZeroCounter = 0;
 		}
-		if (velocityZeroCounter > 13) {
+		if (velocityZeroCounter > 4) {
+			//printf("QuitingIn\n");
 			motorSetPower(&motorRollers, 0.15);
 			intakeState = IntakeNone;
 		} else {
+		//	printf("Running in");
 			motorSetPower(&motorRollers, 1.0);
 		}
 	} else if (intakeState == IntakeOut) {
+		//printf("Running out");
 		velocityZeroCounter = 0;
 		motorSetPower(&motorRollers, -1.0);
+	} else {
+		velocityZeroCounter = 0;
 	}
-	//printf("Intake Velocity = %d\n", intakeVelocity);
+	//printf("IV = %d %d\n", intakeVelocity);
 
 	lastPosition = intakePosition;
 }

@@ -43,6 +43,7 @@ Navigator navigator;
 
 LineSensor leftLine;
 LineSensor rightLine;
+LineSensor backLine;
 
 LineSensor leftBarDetect;
 LineSensor rightBarDetect;
@@ -106,11 +107,12 @@ int getIntakePosition();
 typedef enum IntakeState {
 	IntakeIn,
 	IntakeOut,
+	IntakeFullIn,
 	IntakeNone
 } IntakeState;
 
 void intakeIn();
-
+void intakeFullIn();
 void intakeOut();
 
 void intakeNone();
