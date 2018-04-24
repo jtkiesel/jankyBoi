@@ -71,6 +71,11 @@ void mogoDown() {
 	mogoState = MogoDown;
 }
 
+void mogoDownSlow() {
+	mogoDone = false;
+	mogoState = MogoDownSlow;
+}
+
 void mogoHoldUp() {
 	mogoDone = true;
 	mogoState = MogoHoldUp;
@@ -88,9 +93,15 @@ void mogoTask() {
 			motorSetPower(&motorMogo, 1.0);
 			delay(1000);
 			motorSetPwm(&motorMogo, 15);
-		} else {
+		} else if (mogoState == MogoDown){
 			motorSetPower(&motorMogo, -1.0);
 			delay(1000);
+			motorSetPwm(&motorMogo, -15);
+		} else if (mogoState == MogoDownSlow){
+			motorSetPower(&motorMogo, -1.0);
+			delay(500);
+			motorSetPower(&motorMogo, -0.6);
+			delay(700);
 			motorSetPwm(&motorMogo, -15);
 		}
 		mogoDone = true;
@@ -104,6 +115,7 @@ void waitUntilMogo() {
 }
 
 LiftState liftState = LiftDown;
+bool liftIsDone = true;
 
 void liftUp() {
 	liftState = LiftUp;
@@ -111,22 +123,32 @@ void liftUp() {
 
 void liftDown() {
 	liftState = LiftDown;
+	liftIsDone = false;
 }
 
 void liftLoads() {
 	liftState = LiftLoads;
+	liftIsDone = false;
 }
 
 void liftPickupLoads() {
 	liftState = LiftPickupLoads;
+	liftIsDone = false;
 }
 
 void liftMid() {
 	liftState = LiftMid;
+	liftIsDone = false;
 }
 
 int getLiftPosition() {
 	return encoderGet(encoderLift);
+}
+
+void waitUntilLift() {
+	while (!liftIsDone) {
+		delay(20);
+	}
 }
 
 void liftTask() {
@@ -145,13 +167,16 @@ void liftTask() {
 	} else if (liftState == LiftLoads) {
 		error = -600 - liftPosition;
 	} else if (liftState == LiftPickupLoads) {
-		error = -800 - liftPosition;
+		error = -900 - liftPosition;
 	} else {
 		error = -1325 - liftPosition;
 		if (fabs(error) < 20) {
 			hold = -0.1;
 		}
 	}
+
+	liftIsDone = fabs(error) < 150;
+
 	double pidOutput = pidControllerComputeOutput(&liftController, -error, 1);
 
 	if (hold != 0) {
@@ -180,9 +205,9 @@ void intakeNone() {
 	intakeState = IntakeNone;
 }
 
-void intakeFullIn() {
+/*void intakeFullIn() {
 	intakeState = IntakeFullIn;
-}
+}*/
 
 void intakeTask() {
 	static int lastPosition = 0;
@@ -201,6 +226,7 @@ void intakeTask() {
 		//printf("IntakeNone\n");
 	} else if (intakeState == IntakeIn) {
 		if (abs(intakeVelocity) < 2) {
+			printf("intakeVelocity: %d\n", intakeVelocity);
 			velocityZeroCounter++;
 		} else {
 			velocityZeroCounter = 0;

@@ -68,12 +68,15 @@ void debugTask();
 typedef enum MogoState {
 	MogoUp,
 	MogoDown,
+	MogoDownSlow,
 	MogoHoldUp,
 } MogoState;
 void mogoHoldUp();
 void mogoUp();
 
 void mogoDown();
+
+void mogoDownSlow();
 
 int getMogoPosition();
 
@@ -97,6 +100,7 @@ void liftMid();
 
 void liftLoads();
 void liftPickupLoads();
+void waitUntilLift();
 
 int getLiftPosition();
 
