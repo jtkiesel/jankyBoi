@@ -6,7 +6,7 @@ Team BNS's 2018 VEX U robot code. Written in C and run on PROS.
 
 From the command line:
 ```
-$ git clone https://github.com/jtkiesel/bns2018
+$ git clone https://github.com/jtkiesel/jankyBoi
 ```
 
 ### Prerequisites
@@ -16,6 +16,9 @@ $ git clone https://github.com/jtkiesel/bns2018
 ## Authors
 
 * **Jordan Kiesel**
+* **Justin Marple**
+* **Sam Krispin**
+* **Vivian Garrett**
 
 ## License
 
